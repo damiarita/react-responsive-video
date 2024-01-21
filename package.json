@@ -1,0 +1,25 @@
+{
+  "name": "@damiarita/react-responsive-video",
+  "version": "0.0.1",
+  "description": "React component to improve peformance of web pages with videos",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/damiarita/react-responsive-video.git"
+  },
+  "keywords": [
+    "performance",
+    "react",
+    "responsive",
+    "video"
+  ],
+  "author": "Damià Rita",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/damiarita/react-responsive-video/issues"
+  },
+  "homepage": "https://github.com/damiarita/react-responsive-video#readme"
+}
