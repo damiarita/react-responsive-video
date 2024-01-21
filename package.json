@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/damiarita/react-responsive-video#readme",
   "devDependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
