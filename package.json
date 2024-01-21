@@ -4,7 +4,7 @@
   "description": "React component to improve peformance of web pages with videos",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/damiarita/react-responsive-video/issues"
   },
-  "homepage": "https://github.com/damiarita/react-responsive-video#readme"
+  "homepage": "https://github.com/damiarita/react-responsive-video#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
 }
