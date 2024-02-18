@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`YourComponent renders with initial window width 1`] = `
+<picture
+  data-env="client"
+  data-inner="1024"
+  data-testid="my-component"
+  data-width="1024"
+/>
+`;
+
+exports[`YourComponent updates on window resize 1`] = `
+<picture
+  data-env="client"
+  data-inner="1024"
+  data-testid="my-component"
+  data-width="1024"
+/>
+`;
+
+exports[`YourComponent updates on window resize 2`] = `
+<picture
+  data-env="client"
+  data-inner="1024"
+  data-testid="my-component"
+  data-width="768"
+/>
+`;

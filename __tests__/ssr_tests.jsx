@@ -1,9 +1,8 @@
-import { renderToString } from 'react-dom/server';
-import ResponsiveVideo from '../ResponsiveVideo'
+import {create, act} from 'react-test-renderer';
+import ResponsiveVideo from '../src'
 
-describe('Response of the module on SRR', () => {
-  test('test empty picture', () => {
-    const ssrContent = renderToString(<ResponsiveVideo/>);
-    expect(ssrContent).toContain('picture');
-  });
+
+it('SSR renders correctly', () => {
+  const component = create(<ResponsiveVideo/>);
+  expect(component.toJSON()).toMatchSnapshot();
 });
