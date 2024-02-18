@@ -1,0 +1,66 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SSR renders correctly 1`] = `
+<picture>
+  <source
+    height={972}
+    media="(min-width: 1200px)"
+    srcSet="https://www.example.com/desktop.avif"
+    type="image/avif"
+    width={2000}
+  />
+  <source
+    height={972}
+    media="(min-width: 1200px)"
+    srcSet="https://www.example.com/desktop.webp"
+    type="image/webp"
+    width={2000}
+  />
+  <source
+    height={972}
+    media="(min-width: 1200px)"
+    srcSet="https://www.example.com/desktop.jpg"
+    type="image/jpeg"
+    width={2000}
+  />
+  <source
+    height={1024}
+    media="(min-width: 768px)"
+    srcSet="https://www.example.com/tablet.avif"
+    type="image/avif"
+    width={1024}
+  />
+  <source
+    height={1024}
+    media="(min-width: 768px)"
+    srcSet="https://www.example.com/tablet.webp"
+    type="image/webp"
+    width={1024}
+  />
+  <source
+    height={1024}
+    media="(min-width: 768px)"
+    srcSet="https://www.example.com/tablet.jpg"
+    type="image/jpeg"
+    width={1024}
+  />
+  <source
+    height={900}
+    srcSet="https://www.example.com/mobile.avif"
+    type="image/avif"
+    width={600}
+  />
+  <source
+    height={900}
+    srcSet="https://www.example.com/mobile.webp"
+    type="image/webp"
+    width={600}
+  />
+  <source
+    height={900}
+    srcSet="https://www.example.com/mobile.jpg"
+    type="image/jpeg"
+    width={600}
+  />
+</picture>
+`;

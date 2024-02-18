@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`SSR renders correctly 1`] = `
-<picture
-  data-env="ssr"
-  data-inner={1024}
-  data-width={0}
-/>
-`;
