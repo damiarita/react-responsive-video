@@ -1,5 +1,4 @@
-import React, {useState, useEffect, VideoHTMLAttributes, ImgHTMLAttributes} from 'react';
-import {useWindowWidth} from '@react-hook/window-size/throttled'
+import React, {VideoHTMLAttributes, ImgHTMLAttributes} from 'react';
 
 interface Source{
   url: string, 
@@ -22,9 +21,6 @@ interface Props{
 }
 
 export default ({pictureProps, sizes}:Props) => {
-  const [env, setEnv]=useState("ssr");
-  const width = useWindowWidth({fps:2, leading:true})
-  useEffect(()=>setEnv("client"))
   return (
     <picture {...pictureProps}>
       {sizes.flatMap(
