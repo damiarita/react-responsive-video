@@ -1,4 +1,4 @@
-import {create, act} from 'react-test-renderer';
+import {create} from 'react-test-renderer';
 import ResponsiveVideo from '../src'
 
 
