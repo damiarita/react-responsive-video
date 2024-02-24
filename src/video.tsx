@@ -12,7 +12,7 @@ export default({videoProps, sizes, show}:Props)=>{
     const styles = show?{}:{style:{display:"none"}};
     return(
         <video {...(Object.assign({},videoProps, styles))} height={selectedSize?.height} width={selectedSize?.width}>
-            {(selectedSize===undefined || selectedSize.videoSources.length===0)?undefined:selectedSize.videoSources.map(({url, format}, sourceIndex)=>(<source key={`${selectedSize.mediaQuery}-${sourceIndex}`} src={url} type={format} />))}
+            {(selectedSize===undefined || selectedSize.videoSources.length===0)?undefined:selectedSize.videoSources.map(({url, format})=>(<source key={`${selectedSize.mediaQuery}-${url}`} src={url} type={format} />))}
         </video>
     )
 }
