@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, act } from '@testing-library/react';
 import ResponsiveVideo from '../src'
 import {pictureProps, imgProps, videoProps, sizes} from './data/fullProps'
