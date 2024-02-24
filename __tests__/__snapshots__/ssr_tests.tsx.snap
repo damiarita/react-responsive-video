@@ -1,7 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SSR renders correctly 1`] = `
-<picture>
+exports[`The behaviour of the component on SSR SSR renders correctly when all props are sent 1`] = `
+<picture
+  style={
+    {
+      "display": "block",
+    }
+  }
+>
   <source
     height={972}
     media="(min-width: 1200px)"
@@ -62,5 +68,29 @@ exports[`SSR renders correctly 1`] = `
     type="image/jpeg"
     width={600}
   />
+  <img
+    id="testID"
+  />
+</picture>
+`;
+
+exports[`The behaviour of the component on SSR SSR renders correctly when invalid props are sent 1`] = `
+<picture>
+  <source
+    media="(min-width: 9999999px)"
+    srcSet="https://www.example.com/mobile.jpg"
+    type="image/jpeg"
+  />
+  <img />
+</picture>
+`;
+
+exports[`The behaviour of the component on SSR SSR renders correctly when minimum props are sent 1`] = `
+<picture>
+  <source
+    srcSet="https://www.example.com/mobile.jpg"
+    type="image/jpeg"
+  />
+  <img />
 </picture>
 `;

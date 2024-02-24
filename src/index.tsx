@@ -1,33 +1,22 @@
 import React, {VideoHTMLAttributes, ImgHTMLAttributes} from 'react';
-
-interface Source{
-  url: string, 
-  format: string
-}
-
-interface Size{
-  height?: number,
-  width?: number,
-  mediaQuery?: string,
-  videoSources:Source[],
-  posterSources:Source[]
-}
+import {useWindowWidth} from '@react-hook/window-size/throttled';
+import Size from './types/size'
+import Poster from './poster'
+import Video from './video'
 
 interface Props{
   videoProps?: VideoHTMLAttributes<HTMLVideoElement>,
   pictureProps?: React.HTMLAttributes<HTMLElement>,
-  imgPorps?: ImgHTMLAttributes<HTMLImageElement>,
+  imgProps?: ImgHTMLAttributes<HTMLImageElement>,
   sizes: Size[]
 }
 
-export default ({pictureProps, sizes}:Props) => {
+export default ({pictureProps, videoProps, imgProps, sizes}:Props) => {
+  const width = useWindowWidth({initialWidth:0, fps:2, leading:true});
   return (
-    <picture {...pictureProps}>
-      {sizes.flatMap(
-        ({height, width, mediaQuery, posterSources}, sizeIndex)=>(posterSources.map(
-          ({url, format}, sourceIndex)=>(<source key={sizeIndex.toString()+"-"+sourceIndex.toString()} height={height} width={width} media={mediaQuery} srcSet={url} type={format} />))
-        )
-      )}
-    </picture>
+    <>
+      <Poster pictureProps={pictureProps} imgProps={imgProps} sizes={sizes}/>
+      {width>0 && <Video show={false} videoProps={videoProps} sizes={sizes} />}
+      </>
   );
 }
