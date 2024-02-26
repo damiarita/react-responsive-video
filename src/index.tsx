@@ -16,7 +16,7 @@ export default ({pictureProps, videoProps, imgProps, sizes}:Props) => {
   const width = useWindowWidth({initialWidth:0, fps:2, leading:true});
   const loadedPosterUrl = useLoadedUrl(sizes);
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);
-  const posterIsLoaded = loadedPosterUrl!==loadedPosterUrl;
+  const posterIsLoaded = loadedPosterUrl!==undefined;
   const somethingIsLoaded = posterIsLoaded || videoIsLoaded;
   return (
     <>
