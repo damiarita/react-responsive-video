@@ -10,6 +10,15 @@ jest.mock('@react-hook/window-size/throttled', () => ({
   useWindowWidth: jest.fn(()=>mockWindowWidth),
 }));
 
+
+let mockOnLoad, mockOnError;
+jest.mock('../src/utils/createPictureElement', ()=>(
+ function(sizes, handleLoad, handleError){
+  mockOnLoad=handleLoad;
+  mockOnError=handleError;
+ }
+));
+
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(function(query){
@@ -71,6 +80,7 @@ describe('Component on the browser', () => {
     act(() => {
       mockWindowWidth=768;
       window.dispatchEvent(new Event('resize'));
+      mockOnLoad("test.url")
     });
     rerender(<ResponsiveVideo
       pictureProps={pictureProps}

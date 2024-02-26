@@ -1,18 +1,25 @@
 import {VideoHTMLAttributes} from 'react';
 import Size from './types/size'
 
+export interface VideoProps extends Exclude<VideoHTMLAttributes<HTMLVideoElement>, 'poster'>{}
+
 interface Props{
-    videoProps?: VideoHTMLAttributes<HTMLVideoElement>,
+    videoProps?: VideoProps,
     sizes: Size[],
     show:boolean,
+    poster?:string
   }
 
-export default({videoProps, sizes, show}:Props)=>{
+export default({videoProps, sizes, show, poster}:Props)=>{
     const selectedSize = sizes.find(({mediaQuery})=>mediaQuery===undefined || window.matchMedia(mediaQuery).matches);
-    const styles = show?{}:{style:{display:"none"}};
+    const overRidenVideoProps = Object.assign(
+        {},
+        videoProps,
+        show?{}:{style:{display:"none"}}
+    );
     return(
-        <video {...(Object.assign({},videoProps, styles))} height={selectedSize?.height} width={selectedSize?.width}>
-            {(selectedSize===undefined || selectedSize.videoSources.length===0)?undefined:selectedSize.videoSources.map(({url, format})=>(<source key={`${selectedSize.mediaQuery}-${url}`} src={url} type={format} />))}
+        <video {...overRidenVideoProps} height={selectedSize?.height} width={selectedSize?.width} poster={poster}>
+            {selectedSize?.videoSources.map(({url, format})=>(<source key={`${selectedSize.mediaQuery}-${url}`} src={url} type={format} />))}
         </video>
     )
 }

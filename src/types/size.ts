@@ -1,7 +1,7 @@
 
 interface Source{
     url: string, 
-    format: string
+    format?: string
   }
 export default interface Size{
     height?: number,
