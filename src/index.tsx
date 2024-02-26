@@ -21,7 +21,7 @@ export default ({pictureProps, videoProps, imgProps, sizes}:Props) => {
   return (
     <>
       {!somethingIsLoaded && <Poster pictureProps={pictureProps} imgProps={imgProps} sizes={sizes}/>}
-      {width>0 && <Video show={somethingIsLoaded} videoProps={videoProps} sizes={sizes} poster={loadedPosterUrl}/>}
+      {width>0 && <Video show={somethingIsLoaded} videoProps={videoProps} sizes={sizes} poster={loadedPosterUrl} onLoad={()=>setVideoIsLoaded(true)}/>}
     </>
   );
 }
