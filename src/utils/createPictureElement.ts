@@ -1,22 +1,22 @@
 import Size from '../types/size'
 export default function(sizes:Size[], handleLoad:(url:string)=>void, handleError:(url:string)=>void){
-    const p = document.createElement("picture");
+    const picture = document.createElement("picture");
     sizes.flatMap(({mediaQuery, posterSources})=>posterSources.map(
       function({url, format}){
-          const s = document.createElement("source");
-          s.srcset = url;
+          const source = document.createElement("source");
+          source.srcset = url;
           if(mediaQuery){
-              s.media=mediaQuery;
+              source.media=mediaQuery;
           }
           if(format){
-              s.type=format;
+              source.type=format;
           }
-          return s
+          return source
       }
-    )).forEach(source => p.appendChild(source));  
-    const i = document.createElement("img");
-    i.onload=()=>handleLoad(i.currentSrc);
-    i.onerror=()=>handleError(i.currentSrc);
-    p.appendChild(i);
-    return p
+    )).forEach(source => picture.appendChild(source));  
+    const image = document.createElement("img");
+    image.onload=()=>handleLoad(image.currentSrc);
+    image.onerror=()=>handleError(image.currentSrc);
+    picture.appendChild(image);
+    return picture
 }
