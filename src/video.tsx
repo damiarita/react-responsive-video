@@ -8,19 +8,19 @@ interface Props{
     sizes: Size[],
     show:boolean,
     poster?:string,
-    onLoad: ()=>void,
+    onLoadStart: ()=>void,
   }
 
-export default({videoProps, sizes, show, poster, onLoad}:Props)=>{
+export default({videoProps, sizes, show, poster, onLoadStart}:Props)=>{
     const selectedSize = sizes.find(({mediaQuery})=>mediaQuery===undefined || window.matchMedia(mediaQuery).matches);
     const overRidenVideoProps = Object.assign(
         {},
         videoProps,
         show?{}:{style:{display:"none"}},
-        {onLoad:(e:SyntheticEvent<HTMLVideoElement>)=>{onLoad(); if(videoProps?.onLoad) {videoProps.onLoad(e);}} }
+        {onLoadStart:(e:SyntheticEvent<HTMLVideoElement>)=>{onLoadStart(); if(videoProps?.onLoad) {videoProps.onLoad(e);}} }
     );
     return(
-        <video {...overRidenVideoProps} height={selectedSize?.height} width={selectedSize?.width} poster={poster} onLoad={onLoad}>
+        <video {...overRidenVideoProps} height={selectedSize?.height} width={selectedSize?.width} poster={poster} >
             {selectedSize?.videoSources.map(({url, format})=>(<source key={`${selectedSize.mediaQuery}-${url}`} src={url} type={format} />))}
         </video>
     )
