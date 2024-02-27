@@ -1,5 +1,5 @@
 import {VideoHTMLAttributes, SyntheticEvent} from 'react';
-import Size from './types/size'
+import Size from '../types/size'
 
 export interface VideoProps extends Exclude<VideoHTMLAttributes<HTMLVideoElement>, 'poster'>{}
 

@@ -1,8 +1,8 @@
 import {useWindowWidth} from '@react-hook/window-size/throttled';
-import Size from './types/size'
+import Size from '../types/size'
 import Poster, {ImageProps, PictureProps} from './poster'
 import Video, {VideoProps} from './video'
-import useLoadedUrl from './hooks/useLoadedUrl';
+import useLoadedUrl from '../hooks/useLoadedUrl';
 import { useState } from 'react';
 
 interface Props{
