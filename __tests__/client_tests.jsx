@@ -76,11 +76,23 @@ describe('Component on the browser', () => {
       />);
     expect(asFragment()).toMatchSnapshot();
 
-    // Simulate a window resize event
+    //Simulate Image Onload Event
+    act(()=>{
+      mockOnLoad("https://www.example.com/desktop.webp")
+    });
+    rerender(<ResponsiveVideo
+      pictureProps={pictureProps}
+      imgProps={imgProps}
+      videoProps={videoProps}
+      sizes={sizes}
+    />);
+    expect(asFragment()).toMatchSnapshot();
+
+    // Simulate a window resize event with error in image
     act(() => {
       mockWindowWidth=768;
       window.dispatchEvent(new Event('resize'));
-      mockOnLoad("test.url")
+      mockOnError("https://www.example.com/tablet.webp")
     });
     rerender(<ResponsiveVideo
       pictureProps={pictureProps}
