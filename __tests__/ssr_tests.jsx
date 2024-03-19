@@ -1,4 +1,3 @@
-import React from 'react';
 import {create} from 'react-test-renderer';
 import ResponsiveVideo from '../src'
 import {pictureProps, imgProps, videoProps, sizes} from './data/fullProps'
