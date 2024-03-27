@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "npx eslint . && jest"
+    "test": "npx prettier -l . && npx eslint . && jest"
   },
   "repository": {
     "type": "git",
