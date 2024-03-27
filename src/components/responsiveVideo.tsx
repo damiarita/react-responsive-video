@@ -3,7 +3,7 @@ import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 
 interface Props {
   videoProps?: VideoProps;
@@ -23,6 +23,8 @@ export default function ReactResponsiveVideo({
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);
   const posterIsLoaded = loadedPosterUrl !== undefined;
   const somethingIsLoaded = posterIsLoaded || videoIsLoaded;
+  const setVideoLoadedToTrue = useCallback(() => setVideoIsLoaded(true), []);
+
   return (
     <>
       {!somethingIsLoaded && (
@@ -34,7 +36,7 @@ export default function ReactResponsiveVideo({
           videoProps={videoProps}
           sizes={sizes}
           poster={loadedPosterUrl}
-          onLoadStart={() => setVideoIsLoaded(true)}
+          onLoadStart={setVideoLoadedToTrue}
         />
       )}
     </>
