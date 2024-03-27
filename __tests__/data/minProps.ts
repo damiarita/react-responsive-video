@@ -1,16 +1,18 @@
-import Size from '../../src/types/size'
+import Size from '../../src/types/size';
 
-export const sizes:Size[]=[
+export const sizes: Size[] = [
   {
-    posterSources:[
+    posterSources: [
       {
-        url:"https://www.example.com/mobile.jpg",
-        format:"image/jpeg"
-      }
+        url: 'https://www.example.com/mobile.jpg',
+        format: 'image/jpeg',
+      },
     ],
-    videoSources:[      {
-      url:"https://www.example.com/mobile.webm",
-      format:"video/webm"
-    }]
-  }
+    videoSources: [
+      {
+        url: 'https://www.example.com/mobile.webm',
+        format: 'video/webm',
+      },
+    ],
+  },
 ];
