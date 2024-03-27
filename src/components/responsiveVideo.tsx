@@ -3,7 +3,7 @@ import Size from '../types/size'
 import Poster, {ImageProps, PictureProps} from './poster'
 import Video, {VideoProps} from './video'
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 interface Props{
   videoProps?: VideoProps,
@@ -12,7 +12,7 @@ interface Props{
   sizes: Size[]
 }
 
-export default ({pictureProps, videoProps, imgProps, sizes}:Props) => {
+export default function ReactResponsiveVideo ({pictureProps, videoProps, imgProps, sizes}:Props){
   const width = useWindowWidth({initialWidth:0, fps:2, leading:true});
   const loadedPosterUrl = useLoadedUrl(sizes);
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);

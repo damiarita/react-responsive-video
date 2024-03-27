@@ -1,4 +1,4 @@
-import {VideoHTMLAttributes, SyntheticEvent} from 'react';
+import React, {VideoHTMLAttributes, SyntheticEvent} from 'react';
 import Size from '../types/size'
 
 export interface VideoProps extends Exclude<VideoHTMLAttributes<HTMLVideoElement>, 'poster'>{}
@@ -11,7 +11,7 @@ interface Props{
     onLoadStart: ()=>void,
   }
 
-export default({videoProps, sizes, show, poster, onLoadStart}:Props)=>{
+export default function Video ({videoProps, sizes, show, poster, onLoadStart}:Props){
     const selectedSize = sizes.find(({mediaQuery})=>mediaQuery===undefined || window.matchMedia(mediaQuery).matches);
     const overRidenVideoProps = Object.assign(
         {},
