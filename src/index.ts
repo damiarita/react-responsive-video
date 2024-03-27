@@ -1,3 +1,3 @@
-import ReactResponsiveVideo from './components/responsiveVideo'
+import ReactResponsiveVideo from './components/responsiveVideo';
 
 export default ReactResponsiveVideo;
