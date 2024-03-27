@@ -3,6 +3,7 @@ import ResponsiveVideo from '../src';
 import { pictureProps, imgProps, videoProps, sizes } from './data/fullProps';
 import { sizes as minimalSizes } from './data/minProps';
 import { sizes as invalidSizes } from './data/invalidProps';
+import React from 'react';
 
 let mockWindowWidth = 0;
 // Mock the useWindowWidth hook
