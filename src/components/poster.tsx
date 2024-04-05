@@ -1,10 +1,10 @@
 import React, { ImgHTMLAttributes } from 'react';
 import Size from '../types/size';
 
-export interface PictureProps extends React.HTMLAttributes<HTMLElement> {}
-export interface ImageProps extends ImgHTMLAttributes<HTMLImageElement> {}
+export type PictureProps = React.HTMLAttributes<HTMLElement>
+export type ImageProps = ImgHTMLAttributes<HTMLImageElement>
 
-interface Props {
+type Props = {
   pictureProps?: PictureProps;
   imgProps?: ImageProps;
   sizes: Size[];
