@@ -5,7 +5,10 @@ import Size from '../types/size';
  * The prop type to the Video element that is created on the client. All the props you could send to a <video> React Component are accepted except for 'poster', 'height' and 'width'. These are calculated from the sizes property. id, className, autoPlay... are examples of valid
  * @typedef {Object} VideoProps
  */
-export type VideoProps = Omit<VideoHTMLAttributes<HTMLVideoElement>, 'poster' | 'heigth' | 'width'>
+export type VideoProps = Omit<
+  VideoHTMLAttributes<HTMLVideoElement>,
+  'poster' | 'heigth' | 'width'
+>;
 
 type Props = {
   videoProps?: VideoProps;
@@ -13,7 +16,7 @@ type Props = {
   show: boolean;
   poster?: string;
   onLoadStart: () => void;
-}
+};
 
 export default function Video({
   videoProps,

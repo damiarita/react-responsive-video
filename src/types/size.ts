@@ -1,4 +1,4 @@
-import Source from './source'
+import Source from './source';
 
 /**
  * The elements of the array of sizes that are passed to the Responsive Video React Component. Based on the media queries, only one of the element is selected on the client. Sources (both for images and videos) are defined here
@@ -15,6 +15,6 @@ type Size = {
   mediaQuery?: string;
   videoSources: Source[];
   posterSources: Source[];
-}
+};
 
 export default Size;

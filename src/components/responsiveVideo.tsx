@@ -18,10 +18,10 @@ export type ReactResponsiveVideoProps = {
   pictureProps?: PictureProps;
   imgProps?: ImageProps;
   sizes: Size[];
-}
+};
 
 /**
- * React Component that will optimize video load. On SSR, it paints a <pucture> element with all the sources for the browser to choose. Once on CSR, the element becomes a <video>. Only the sources that are valid for the device sice are give to the <video>. This allows the usage of different video sources by device without having to download all of them. 
+ * React Component that will optimize video load. On SSR, it paints a <pucture> element with all the sources for the browser to choose. Once on CSR, the element becomes a <video>. Only the sources that are valid for the device sice are give to the <video>. This allows the usage of different video sources by device without having to download all of them.
  * @param {ReactResponsiveVideoProps} props
  * @example
  * ```tsx
