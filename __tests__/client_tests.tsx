@@ -36,7 +36,7 @@ Object.defineProperty(window, 'matchMedia', {
 describe('Component on the browser', () => {
   test('renders with initial window width with full props', () => {
     // Mock initial window width
-    mockWindowWidth = 1024;
+    mockWindowWidth = 1300;
 
     const { asFragment } = render(
       <ResponsiveVideo
@@ -51,7 +51,7 @@ describe('Component on the browser', () => {
 
   test('renders with initial window width with minimal props', () => {
     // Mock initial window width
-    mockWindowWidth = 1024;
+    mockWindowWidth = 1300;
 
     const { asFragment } = render(<ResponsiveVideo sizes={minimalSizes} />);
     expect(asFragment()).toMatchSnapshot();
@@ -59,7 +59,7 @@ describe('Component on the browser', () => {
 
   test('renders with initial window width with invalid props', () => {
     // Mock initial window width
-    mockWindowWidth = 1024;
+    mockWindowWidth = 1300;
 
     const { asFragment } = render(<ResponsiveVideo sizes={invalidSizes} />);
     expect(asFragment()).toMatchSnapshot();
@@ -67,7 +67,7 @@ describe('Component on the browser', () => {
 
   test('updates on window resize with full props', () => {
     // Mock initial window width
-    mockWindowWidth = 1024;
+    mockWindowWidth = 1300;
     const { asFragment, rerender } = render(
       <ResponsiveVideo
         pictureProps={pictureProps}

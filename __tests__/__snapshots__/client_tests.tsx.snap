@@ -70,16 +70,16 @@ exports[`Component on the browser renders with initial window width with full pr
     />
   </picture>
   <video
-    height="1024"
+    height="972"
     style="display: none;"
-    width="1024"
+    width="2000"
   >
     <source
-      src="https://www.example.com/tablet.mp4"
+      src="https://www.example.com/desktop.mp4"
       type="video/mp4"
     />
     <source
-      src="https://www.example.com/tablet.webm"
+      src="https://www.example.com/desktop.webm"
       type="video/webm"
     />
   </video>
@@ -192,16 +192,16 @@ exports[`Component on the browser updates on window resize with full props 1`] =
     />
   </picture>
   <video
-    height="1024"
+    height="972"
     style="display: none;"
-    width="1024"
+    width="2000"
   >
     <source
-      src="https://www.example.com/tablet.mp4"
+      src="https://www.example.com/desktop.mp4"
       type="video/mp4"
     />
     <source
-      src="https://www.example.com/tablet.webm"
+      src="https://www.example.com/desktop.webm"
       type="video/webm"
     />
   </video>
@@ -211,17 +211,17 @@ exports[`Component on the browser updates on window resize with full props 1`] =
 exports[`Component on the browser updates on window resize with full props 2`] = `
 <DocumentFragment>
   <video
-    height="1024"
+    height="972"
     poster="https://www.example.com/desktop.webp"
     style="width: auto;"
-    width="1024"
+    width="2000"
   >
     <source
-      src="https://www.example.com/tablet.mp4"
+      src="https://www.example.com/desktop.mp4"
       type="video/mp4"
     />
     <source
-      src="https://www.example.com/tablet.webm"
+      src="https://www.example.com/desktop.webm"
       type="video/webm"
     />
   </video>
