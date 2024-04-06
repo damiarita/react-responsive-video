@@ -130,7 +130,7 @@ export type ReactResponsiveVideoProps = {
  *     ]}
  * />
  * ```
- * @returns {React.ReactElement}
+ * @returns {React.ReactElement} A React Component that produces: 1-> On SSR, a <picture> element with all the poster sources for the browser to choose; 2->Once on the client, the same <picture> element with an additional <video> element which has the correct video sources for the device, no poster image and has display:none (its job is to tell the browser to start downloading the video) and 3-> when either the poster image or the video are loaded, only the <video> element which has the correct video sources for the device and the loaded poster image
  */
 export default function ReactResponsiveVideo({
   pictureProps,

@@ -25,7 +25,7 @@
 
 #### Defined in
 
-[components/poster.tsx:5](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/components/poster.tsx#L5)
+[components/poster.tsx:5](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/components/poster.tsx#L5)
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 #### Defined in
 
-[components/poster.tsx:4](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/components/poster.tsx#L4)
+[components/poster.tsx:4](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/components/poster.tsx#L4)
 
 ___
 
@@ -56,7 +56,7 @@ The prop type to the Responsive Video React Component
 
 #### Defined in
 
-[components/responsiveVideo.tsx:16](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/components/responsiveVideo.tsx#L16)
+[components/responsiveVideo.tsx:16](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/components/responsiveVideo.tsx#L16)
 
 ___
 
@@ -78,7 +78,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 #### Defined in
 
-[types/size.ts:12](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/types/size.ts#L12)
+[types/size.ts:12](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/types/size.ts#L12)
 
 ___
 
@@ -97,7 +97,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 #### Defined in
 
-types/source.ts:7
+[types/source.ts:7](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/types/source.ts#L7)
 
 ___
 
@@ -109,7 +109,7 @@ The prop type to the Video element that is created on the client. All the props 
 
 #### Defined in
 
-[components/video.tsx:8](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/components/video.tsx#L8)
+[components/video.tsx:8](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/components/video.tsx#L8)
 
 ## Functions
 
@@ -128,6 +128,8 @@ React Component that will optimize video load. On SSR, it paints a <pucture> ele
 #### Returns
 
 `Element`
+
+A React Component that produces: 1-> On SSR, a <picture> element with all the poster sources for the browser to choose; 2->Once on the client, the same <picture> element with an additional <video> element which has the correct video sources for the device, no poster image and has display:none (its job is to tell the browser to start downloading the video) and 3-> when either the poster image or the video are loaded, only the <video> element which has the correct video sources for the device and the loaded poster image
 
 **`Example`**
 
@@ -240,4 +242,4 @@ React Component that will optimize video load. On SSR, it paints a <pucture> ele
 
 #### Defined in
 
-[components/responsiveVideo.tsx:135](https://github.com/damiarita/react-responsive-video/blob/4db4bbc/src/components/responsiveVideo.tsx#L135)
+[components/responsiveVideo.tsx:135](https://github.com/damiarita/react-responsive-video/blob/78601a7/src/components/responsiveVideo.tsx#L135)
