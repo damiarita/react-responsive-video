@@ -1,0 +1,13 @@
+__tests__/
+coverage/
+docs/
+src/
+.deepsource.toml
+.eslintignore
+.eslintrc.json
+.gitignore
+.prettierignore
+.prettierrc
+jest.config.js
+tsconfig.json
+typedoc.json
