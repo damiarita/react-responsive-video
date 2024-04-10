@@ -32,6 +32,7 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
                 commit_message: Update source files based on Prettier
+                github_token: ${{ secrets.REPO_TOKEN }}
 
             - name: Generate docs
               run: npm run docs
@@ -40,3 +41,4 @@ jobs:
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
                 commit_message: Update docs based on TypeDocs
+                github_token: ${{ secrets.REPO_TOKEN }}
