@@ -31,7 +31,6 @@ jobs:
             - name: Commit Prettier
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
-                commit_author: Prettier Action
                 commit_message: Update source files based on Prettier
 
             - name: Generate docs
@@ -40,5 +39,4 @@ jobs:
             - name: Commit Prettier
               uses: stefanzweifel/git-auto-commit-action@v5
               with:
-                commit_author: TypeDocs Action
                 commit_message: Update docs based on TypeDocs
