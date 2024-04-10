@@ -4,9 +4,12 @@ jobs:
     check-repo:
         name: Auto Update Repo
         runs-on: ubuntu-latest
+        permissions:
+          # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+          contents: write
         steps:
             - name: Checkout code
-              uses: actions/checkout@v2
+              uses: actions/checkout@v4
               with:
                 token: ${{ secrets.REPO_TOKEN }}
 
@@ -25,16 +28,16 @@ jobs:
               run: npm run format
 
             - name: Commit Prettier
-              uses: EndBug/add-and-commit@v9
+              uses: stefanzweifel/git-auto-commit-action@v5
               with:
                 author_name: Prettier Action
-                message: 'Update source files based on Prettier'
+                commit_message: Update source files based on Prettier
 
             - name: Generate docs
               run: npm run docs
 
             - name: Commit Prettier
-              uses: EndBug/add-and-commit@v9
+              uses: stefanzweifel/git-auto-commit-action@v5
               with:
                 author_name: TypeDocs Action
-                message: 'Update docs based on TypeDocs'
+                commit_message: Update docs based on TypeDocs
