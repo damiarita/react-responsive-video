@@ -18,7 +18,7 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-  
+
       - name: Prettify code
         run: npm run format
 
