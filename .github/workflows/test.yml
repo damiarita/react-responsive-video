@@ -1,8 +1,8 @@
-name: Test, Format and Create Docs
+name: Test
 on: [push, pull_request]
 jobs:
-  check-repo:
-    name: Auto Update Repo
+  test:
+    name: Test Repo
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

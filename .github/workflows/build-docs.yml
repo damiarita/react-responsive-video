@@ -1,8 +1,8 @@
-name: Test, Format and Create Docs
+name: Create Docs
 on: [push, pull_request]
 jobs:
-  check-repo:
-    name: Auto Update Repo
+  docs:
+    name: Build docs from JSDoc
     runs-on: ubuntu-latest
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
