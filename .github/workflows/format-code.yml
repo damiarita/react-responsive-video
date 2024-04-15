@@ -1,0 +1,28 @@
+name: Test, Format and Create Docs
+on: [push, pull_request]
+jobs:
+    check-repo:
+        name: Auto Update Repo
+        runs-on: ubuntu-latest
+        permissions:
+          # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
+          contents: write
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v2
+              with:
+                node-version: '18'
+            
+            - name: Install dependencies
+              run: npm install
+
+            - name: Generate docs
+              run: npm run docs
+
+            - name: Commit Prettier
+              uses: stefanzweifel/git-auto-commit-action@v5
+              with:
+                commit_message: Update docs based on TypeDocs
