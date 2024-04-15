@@ -18,18 +18,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Configure Git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+
       - name: Bump Version
         run: |
           npm version ${{ github.event.release.tag_name }}
 
       - name: Build Package
         run: npm run build
-
-
-      - name: Configure Git
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
 
       - name: Publish Package to npm
         env:
