@@ -6,9 +6,6 @@ jobs:
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
-    permissions:
-      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
-      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,6 +29,3 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
         run: npm publish --access public
-
-      - name: Push tag
-        run: git push --follow-tags
