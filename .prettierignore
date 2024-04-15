@@ -3,4 +3,3 @@ coverage
 dist
 tsconfig.json
 docs
-.github/workflows

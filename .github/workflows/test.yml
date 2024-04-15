@@ -1,20 +1,20 @@
 name: Test, Format and Create Docs
 on: [push, pull_request]
 jobs:
-    check-repo:
-        name: Auto Update Repo
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  check-repo:
+    name: Auto Update Repo
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v2
-              with:
-                node-version: '18'
-            
-            - name: Install dependencies
-              run: npm install
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
 
-            - name: Run tests
-              run: npm test
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
