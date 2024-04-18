@@ -1,5 +1,3 @@
-@damiarita/react-responsive-video / [Exports](modules.md)
-
 # React Responsive Video
 
 ## Summary
@@ -29,6 +27,7 @@ With the video tag, you cannot add media queries in the <source>s. It is not so 
 The easy solution is to add one <video> element for each device size and hide the invalid ones with CSS. The drawback is that your browser will download one video file for each <video> (display:none does not avoid downloading the assets!)
 
 This component provides the best solution. It downloads only one poster image and one video. It does this by being opinionated. It assumes that if the user changes the window width, it is OK to change the video sources accordingly. It assumed that the poster images of each size have the same resolution as the videos of that size. It is also assumed that the <picture> and the <video> tags that the component renders during the page load have similar styles (i.e: width:100%;height:auto; ).
+
 
 ## How to use it?
 
@@ -141,3 +140,4 @@ Does this package almost solve your problem? Help me help you! Send a PR and let
 
 ## License
 This project is distributed under the MIT License. Check the LICENSE file for details!
+
