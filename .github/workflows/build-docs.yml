@@ -24,7 +24,7 @@ jobs:
       - name: Generate docs
         run: npm run docs
 
-      - name: Commit Prettier
+      - name: Commit Typedocs
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Update docs based on TypeDocs
