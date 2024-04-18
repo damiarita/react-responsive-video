@@ -16,7 +16,7 @@ It is important the the `<picture>` and the `<video>` elements have similar styl
 It is very nice to be able to optimize your site performance by providing your browser with multiple URLs for each `<picture>`. The browser selects the best one based on the device size (via media queries) and the supported format. Add this piece of code and the browser will magicaly select the best file for your user
 
 ```html
-`<picture>`
+<picture>
   <source
     width="666"
     height="666"
