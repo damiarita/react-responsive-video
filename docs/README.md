@@ -2,6 +2,8 @@
 
 # React Responsive Video
 
+Pass all your video files (different aspect ratios and formats) to this React component, it will choose the best one for each browser and will avoid downloading the rest.
+
 ## Summary
 
 This library provides a React component that will allow you to have different video (and poster images) versions for different device sizes.
@@ -11,7 +13,7 @@ The HTML `<video>` tag does not allow you to have different sources for differen
 1. In Server Side Rendering (SSR), it paints a `<picture>` element with all your poster image sources.
 1. Once on the client, it is replaced with a `<video>` element with the right video sources and the right poster image source
 
-It is important the the `<picture>` and the `<video>` elements have similar styles (i.e: width:100%;height:auto; ) so that replacing one by the other does not change the layout.
+It is important that the `<picture>` and the `<video>` elements have similar styles (i.e: width:100%;height:auto; ) so that replacing one by the other does not change the layout.
 
 ## More details
 
@@ -73,7 +75,7 @@ npm i @damiarita/react-responsive-video
 
 ### Usage
 
-You have all the details in the [docs](/damiarita/react-responsive-video/blob/master/docs/modules.md#default).
+You have all the details in the [docs](/docs/modules.md#default).
 
 The most important prop of the component is sizes. It is an array. Each item of the array should have a media query, an array of video sources, an array of poster image sources, a height and a width. The media query must define the devices where the sources are valid. The video sources should be different formats of the same video (mp4, webm...). The poster image sources should be different formats of the same image (ideally the first frame of the video). The height of the width define the resolution of the poster images and videos (which should have the same resolution).
 
