@@ -175,6 +175,10 @@ There are three different moments during the page load of a page that contains t
 
 Does this package almost solve your problem? Help me help you! Send a PR and let's discuss it!
 
+## Contributors
+
+[Christianjhm](https://github.com/christianjhm) and I developed the idea for this component together.
+
 ## License
 
 This project is distributed under the MIT License. Check the LICENSE file for details!
