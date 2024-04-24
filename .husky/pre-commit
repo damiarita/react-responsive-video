@@ -8,7 +8,7 @@ current_branch=$(git rev-parse --abbrev-ref HEAD)
 git fetch origin
 
 # Check if the local branch is behind the remote branch
-if [[ $(git rev-list HEAD..origin/${current_branch} --count) -gt 0 ]]; then
+if [ $(git rev-list HEAD..origin/${current_branch} --count) -gt 0 ]; then
     echo "Local branch $current_branch is behind remote branch origin/${current_branch}! Pull and rebase with 'git rebase origin/${current_branch}'..."
     exit 1
 fi
