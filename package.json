@@ -5,9 +5,9 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "scripts": {
-    "test": "npx eslint . && jest",
-    "build": "npx tsc",
-    "docs": "npx typedoc",
+    "test": "eslint . && jest",
+    "build": "tsc",
+    "docs": "typedoc",
     "format": "prettier --write .",
     "prepare": "husky install"
   },
