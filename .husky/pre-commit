@@ -1,15 +1,14 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-# Get the name of the current branch
-current_branch=$(git rev-parse --abbrev-ref HEAD)
+#List staged files
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+[ -z "$FILES" ] && exit 0
 
-# Fetch the latest changes from the remote repository
-git fetch origin
+# Prettify all selected files
+echo "$FILES" | xargs ./node_modules/.bin/prettier --ignore-unknown --write
 
-# Check if the local branch is behind the remote branch
-if [ $(git rev-list HEAD..origin/${current_branch} --count) -gt 0 ]; then
-    echo "Local branch $current_branch is behind remote branch origin/${current_branch}! Pull and rebase with 'git rebase origin/${current_branch}'..."
-    exit 1
-fi
-npm run docs && git add docs
+# Add back the modified/prettified files to staging
+echo "$FILES" | xargs git add
+
+exit 0

@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Get the name of the current branch
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+# Fetch the latest changes from the remote repository
+git fetch origin
+
+# Check if the local branch is behind the remote branch
+if [ $(git rev-list HEAD..origin/${current_branch} --count) -gt 0 ]; then
+    echo "Local branch $current_branch is behind remote branch origin/${current_branch}! Pull and rebase with 'git rebase origin/${current_branch}'..."
+    exit 1
+fi
+
+#Run docs commant and check if uncommited changes remain in the docs folder
+npm run docs
+if [ $(git status docs -s | wc -l) -gt 0]; then
+    echo "Docs have been updated. Make sure you commit those changes before pushing"
+    exit 1
+fi
