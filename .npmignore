@@ -2,6 +2,9 @@ __tests__/
 coverage/
 docs/
 src/
+.github/
+.husky/
+babel.config.cjs
 .deepsource.toml
 .eslintignore
 .eslintrc.json
