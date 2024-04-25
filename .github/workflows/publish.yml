@@ -13,9 +13,11 @@ jobs:
           ref: ${{ github.ref }} # Ensure it fetches the correct ref
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18.x'
+          registry-url: 'https://registry.npmjs.org'
+      - run: cat .npmrc
 
       - name: Install dependencies
         run: npm ci
