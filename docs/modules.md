@@ -80,6 +80,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 [types/size.ts:12](https://github.com/damiarita/react-responsive-video/blob/01907b0/src/types/size.ts#L12)
 
+
 ___
 
 ### Source
@@ -241,5 +242,4 @@ A React Component that produces: 1-> On SSR, a <picture> element with all the po
 ```
 
 #### Defined in
-
 [components/responsiveVideo.tsx:135](https://github.com/damiarita/react-responsive-video/blob/01907b0/src/components/responsiveVideo.tsx#L135)
