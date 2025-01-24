@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import Size from '../types/size';
 import createPicture from '../utils/createPictureElement';

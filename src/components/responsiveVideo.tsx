@@ -1,3 +1,5 @@
+'use client';
+
 import { useWindowWidth } from '@react-hook/window-size/throttled';
 import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
