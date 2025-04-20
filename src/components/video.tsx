@@ -6,7 +6,10 @@ import Size from '../types/size';
  * @typedef {Object} VideoProps
  */
 export type VideoProps = Omit<
-  VideoHTMLAttributes<HTMLVideoElement>,
+  React.DetailedHTMLProps<
+    React.VideoHTMLAttributes<HTMLVideoElement>,
+    HTMLVideoElement
+  >,
   'poster' | 'heigth' | 'width'
 >;
 
