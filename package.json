@@ -3,7 +3,6 @@
   "description": "React component to improve peformance of web pages with videos",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
   "scripts": {
     "test": "eslint . && jest",
     "build": "tsc",
