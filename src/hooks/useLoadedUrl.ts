@@ -1,14 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Size from '../types/size';
 import createPicture from '../utils/createPictureElement';
 
 export default function (sizes: Size[]) {
   const [loadedUrl, setLoadedUrl] = useState<string | undefined>(undefined);
-
-  if (document) {
+  useEffect(() => {
     createPicture(sizes, setLoadedUrl, setLoadedUrl);
-  }
+  }, [sizes]);
   return loadedUrl;
 }
