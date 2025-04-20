@@ -1,4 +1,4 @@
-import React, { VideoHTMLAttributes, SyntheticEvent } from 'react';
+import React, { useRef, useEffect, SyntheticEvent } from 'react';
 import Size from '../types/size';
 
 /**
@@ -45,12 +45,27 @@ export default function Video({
       },
     },
   );
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const currentTime = videoRef?.current?.currentTime;
+    const wasPlaying = !videoRef?.current?.paused;
+
+    videoRef?.current?.load();
+
+    // After loading, restore the time position
+    if (currentTime) videoRef.current.currentTime = currentTime;
+    // If the video was playing, resume playback
+    if (wasPlaying) videoRef?.current?.play();
+  }, [selectedSize]);
+
   return (
     <video
       {...overRidenVideoProps}
       height={selectedSize?.height}
       width={selectedSize?.width}
       poster={poster}
+      ref={videoRef}
     >
       {selectedSize?.videoSources.map(({ url, format }) => (
         <source
