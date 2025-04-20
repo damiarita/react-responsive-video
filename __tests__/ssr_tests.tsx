@@ -1,18 +1,16 @@
-import { create } from 'react-test-renderer';
+/**
+ * @jest-environment node
+ */
 import ResponsiveVideo from '../src';
 import { pictureProps, imgProps, videoProps, sizes } from './data/fullProps';
 import { sizes as minimalSizes } from './data/minProps';
 import { sizes as invalidSizes } from './data/invalidProps';
 import React from 'react';
-
-// Mock the useWindowWidth hook
-jest.mock('@react-hook/window-size/throttled', () => ({
-  useWindowWidth: jest.fn(() => 0),
-}));
+import { renderToStaticMarkup } from 'react-dom/server';
 
 describe('The behaviour of the component on SSR', () => {
   it('SSR renders correctly when all props are sent', () => {
-    const component = create(
+    const component = renderToStaticMarkup(
       <ResponsiveVideo
         pictureProps={pictureProps}
         imgProps={imgProps}
@@ -20,16 +18,21 @@ describe('The behaviour of the component on SSR', () => {
         sizes={sizes}
       />,
     );
-    expect(component.toJSON()).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
   });
 
   it('SSR renders correctly when minimum props are sent', () => {
-    const component = create(<ResponsiveVideo sizes={minimalSizes} />);
-    expect(component.toJSON()).toMatchSnapshot();
+    const component = renderToStaticMarkup(
+      <ResponsiveVideo sizes={minimalSizes} />,
+      { ssr: true },
+    );
+    expect(component).toMatchSnapshot();
   });
 
   it('SSR renders correctly when invalid props are sent', () => {
-    const component = create(<ResponsiveVideo sizes={invalidSizes} />);
-    expect(component.toJSON()).toMatchSnapshot();
+    const component = renderToStaticMarkup(
+      <ResponsiveVideo sizes={invalidSizes} />,
+    );
+    expect(component).toMatchSnapshot();
   });
 });

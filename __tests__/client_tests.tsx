@@ -6,10 +6,6 @@ import { sizes as invalidSizes } from './data/invalidProps';
 import React from 'react';
 
 let mockWindowWidth = 0;
-// Mock the useWindowWidth hook
-jest.mock('@react-hook/window-size/throttled', () => ({
-  useWindowWidth: jest.fn(() => mockWindowWidth),
-}));
 
 let mockOnLoad, mockOnError;
 jest.mock(

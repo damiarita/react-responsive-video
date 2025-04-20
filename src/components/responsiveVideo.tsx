@@ -1,11 +1,11 @@
 'use client';
 
-import { useWindowWidth } from '@react-hook/window-size/throttled';
 import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
+import useIsClient from '../hooks/useIsClient';
 
 /**
  * The prop type to the Responsive Video React Component
@@ -140,7 +140,7 @@ export default function ReactResponsiveVideo({
   imgProps,
   sizes,
 }: ReactResponsiveVideoProps) {
-  const width = useWindowWidth({ initialWidth: 0, fps: 2, leading: true });
+  const isClient = useIsClient();
   const loadedPosterUrl = useLoadedUrl(sizes);
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);
   const posterIsLoaded = loadedPosterUrl !== undefined;
@@ -152,7 +152,7 @@ export default function ReactResponsiveVideo({
       {!somethingIsLoaded && (
         <Poster pictureProps={pictureProps} imgProps={imgProps} sizes={sizes} />
       )}
-      {width > 0 && (
+      {isClient && (
         <Video
           show={somethingIsLoaded}
           videoProps={videoProps}
