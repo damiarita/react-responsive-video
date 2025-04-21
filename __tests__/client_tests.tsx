@@ -22,7 +22,7 @@ Object.defineProperty(window, 'matchMedia', {
   value: jest.fn().mockImplementation(function (query) {
     const regex = /\(min-width: (\d*)px\)/;
     const match = regex.exec(query);
-    if (match && match?.length > 2) {
+    if (match && match?.length >= 2) {
       const minWidth = parseInt(match[1]);
       return {
         matches: minWidth <= mockWindowWidth,
