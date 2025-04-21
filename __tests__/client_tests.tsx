@@ -22,10 +22,17 @@ Object.defineProperty(window, 'matchMedia', {
   value: jest.fn().mockImplementation(function (query) {
     const regex = /\(min-width: (\d*)px\)/;
     const match = regex.exec(query);
-    const minWidth = parseInt(match[1]);
-    return {
-      matches: minWidth <= mockWindowWidth,
-    };
+    if (match && match?.length > 2) {
+      const minWidth = parseInt(match[1]);
+      return {
+        matches: minWidth <= mockWindowWidth,
+      };
+    }
+    throw Error(
+      'Mocked browser only accepts media queries like /(min-width: (d*)px)/. ' +
+        query +
+        ' was passed. Either upgrade the mock or change the media query',
+    );
   }),
 });
 
