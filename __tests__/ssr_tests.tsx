@@ -24,7 +24,6 @@ describe('The behaviour of the component on SSR', () => {
   it('SSR renders correctly when minimum props are sent', () => {
     const component = renderToStaticMarkup(
       <ResponsiveVideo sizes={minimalSizes} />,
-      { ssr: true },
     );
     expect(component).toMatchSnapshot();
   });
