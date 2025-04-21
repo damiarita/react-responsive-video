@@ -1,12 +1,16 @@
-import React, { ImgHTMLAttributes } from 'react';
+import React, {
+  ImgHTMLAttributes,
+  DetailedHTMLProps,
+  HTMLAttributes,
+} from 'react';
 import Size from '../types/size';
 
-export type PictureProps = React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLElement>,
+export type PictureProps = DetailedHTMLProps<
+  HTMLAttributes<HTMLElement>,
   HTMLElement
 >;
-export type ImageProps = React.DetailedHTMLProps<
-  React.ImgHTMLAttributes<HTMLImageElement>,
+export type ImageProps = DetailedHTMLProps<
+  ImgHTMLAttributes<HTMLImageElement>,
   HTMLImageElement
 >;
 

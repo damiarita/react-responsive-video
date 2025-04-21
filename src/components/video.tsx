@@ -1,4 +1,10 @@
-import React, { useRef, useEffect, SyntheticEvent } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  SyntheticEvent,
+  DetailedHTMLProps,
+  VideoHTMLAttributes,
+} from 'react';
 import Size from '../types/size';
 
 /**
@@ -6,10 +12,7 @@ import Size from '../types/size';
  * @typedef {Object} VideoProps
  */
 export type VideoProps = Omit<
-  React.DetailedHTMLProps<
-    React.VideoHTMLAttributes<HTMLVideoElement>,
-    HTMLVideoElement
-  >,
+  DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>,
   'poster' | 'heigth' | 'width'
 >;
 
