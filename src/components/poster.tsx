@@ -1,8 +1,4 @@
-import React, {
-  ImgHTMLAttributes,
-  DetailedHTMLProps,
-  HTMLAttributes,
-} from 'react';
+import { ImgHTMLAttributes, DetailedHTMLProps, HTMLAttributes } from 'react';
 import Size from '../types/size';
 
 export type PictureProps = DetailedHTMLProps<

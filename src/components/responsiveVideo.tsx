@@ -4,7 +4,7 @@ import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import useIsClient from '../hooks/useIsClient';
 
 /**
