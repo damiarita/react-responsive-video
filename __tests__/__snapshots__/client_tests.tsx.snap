@@ -122,7 +122,7 @@ exports[`Component on the browser renders with initial window width with minimal
 </DocumentFragment>
 `;
 
-exports[`Component on the browser updates on window resize with full props 1`] = `
+exports[`Component on the browser updates on window resize with full props and calls load 1`] = `
 <DocumentFragment>
   <picture
     style="display: block;"
@@ -208,7 +208,7 @@ exports[`Component on the browser updates on window resize with full props 1`] =
 </DocumentFragment>
 `;
 
-exports[`Component on the browser updates on window resize with full props 2`] = `
+exports[`Component on the browser updates on window resize with full props and calls load 2`] = `
 <DocumentFragment>
   <video
     height="972"
@@ -228,7 +228,7 @@ exports[`Component on the browser updates on window resize with full props 2`] =
 </DocumentFragment>
 `;
 
-exports[`Component on the browser updates on window resize with full props 3`] = `
+exports[`Component on the browser updates on window resize with full props and calls load 3`] = `
 <DocumentFragment>
   <video
     height="1024"

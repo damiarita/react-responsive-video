@@ -36,6 +36,43 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// Setup a proper mock for HTMLVideoElement
+const mockLoadFn = jest.fn();
+const mockPlayFn = jest.fn().mockImplementation(() => Promise.resolve());
+const mockPauseFn = jest.fn();
+
+// Better approach - mock the implementation before React creates the element
+beforeAll(() => {
+  // Store original properties
+  const originalCreateElement = document.createElement;
+
+  // Mock createElement to provide our own video implementation
+  jest.spyOn(document, 'createElement').mockImplementation((tagName) => {
+    if (tagName.toLowerCase() === 'video') {
+      const mockVideo = originalCreateElement.call(document, tagName);
+      // Add our mocked functions
+      mockVideo.load = mockLoadFn;
+      mockVideo.play = mockPlayFn;
+      mockVideo.pause = mockPauseFn;
+      return mockVideo;
+    }
+    // For other elements, use the original implementation
+    return originalCreateElement.call(document, tagName);
+  });
+});
+
+afterAll(() => {
+  // Clean up the mock
+  jest.restoreAllMocks();
+});
+
+beforeEach(() => {
+  // Reset mock function counts between tests
+  mockLoadFn.mockClear();
+  mockPlayFn.mockClear();
+  mockPauseFn.mockClear();
+});
+
 describe('Component on the browser', () => {
   test('renders with initial window width with full props', () => {
     // Mock initial window width
@@ -68,7 +105,7 @@ describe('Component on the browser', () => {
     expect(asFragment()).toMatchSnapshot();
   });
 
-  test('updates on window resize with full props', () => {
+  test('updates on window resize with full props and calls load', () => {
     // Mock initial window width
     mockWindowWidth = 1300;
     const { asFragment, rerender } = render(
@@ -110,5 +147,8 @@ describe('Component on the browser', () => {
       />,
     );
     expect(asFragment()).toMatchSnapshot();
+
+    // Verify that load was called
+    expect(mockLoadFn).toHaveBeenCalled();
   });
 });
