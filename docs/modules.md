@@ -25,7 +25,7 @@
 
 #### Defined in
 
-[components/poster.tsx:8](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/components/poster.tsx#L8)
+[components/poster.tsx:8](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/components/poster.tsx#L8)
 
 ___
 
@@ -35,7 +35,7 @@ ___
 
 #### Defined in
 
-[components/poster.tsx:4](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/components/poster.tsx#L4)
+[components/poster.tsx:4](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/components/poster.tsx#L4)
 
 ___
 
@@ -56,7 +56,7 @@ The prop type to the Responsive Video React Component
 
 #### Defined in
 
-[components/responsiveVideo.tsx:18](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/components/responsiveVideo.tsx#L18)
+[components/responsiveVideo.tsx:18](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/components/responsiveVideo.tsx#L18)
 
 ___
 
@@ -78,7 +78,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 #### Defined in
 
-[types/size.ts:12](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/types/size.ts#L12)
+[types/size.ts:12](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/types/size.ts#L12)
 
 ___
 
@@ -97,7 +97,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 #### Defined in
 
-[types/source.ts:7](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/types/source.ts#L7)
+[types/source.ts:7](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/types/source.ts#L7)
 
 ___
 
@@ -109,7 +109,7 @@ The prop type to the Video element that is created on the client. All the props 
 
 #### Defined in
 
-[components/video.tsx:14](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/components/video.tsx#L14)
+[components/video.tsx:14](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/components/video.tsx#L14)
 
 ## Functions
 
@@ -242,4 +242,4 @@ A React Component that produces: 1-> On SSR, a <picture> element with all the po
 
 #### Defined in
 
-[components/responsiveVideo.tsx:137](https://github.com/damiarita/react-responsive-video/blob/7303e1f/src/components/responsiveVideo.tsx#L137)
+[components/responsiveVideo.tsx:137](https://github.com/damiarita/react-responsive-video/blob/d1c0925/src/components/responsiveVideo.tsx#L137)
