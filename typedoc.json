@@ -1,4 +1,5 @@
 {
   "plugin": ["typedoc-plugin-markdown"],
-  "entryPoints": ["./src/index.ts"]
+  "entryPoints": ["./src/index.ts"],
+  "gitRevision": "master"
 }
