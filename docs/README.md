@@ -1,4 +1,6 @@
-@damiarita/react-responsive-video / [Exports](modules.md)
+**@damiarita/react-responsive-video**
+
+***
 
 # React Responsive Video
 
