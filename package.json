@@ -48,9 +48,9 @@
     "jsdom": "^27.4.0",
     "prettier": "^3.2.5",
     "react-test-renderer": "^18.2.0",
-    "typedoc": "^0.25.12",
+    "typedoc": "^0.28.15",
     "typedoc-plugin-markdown": "^3.17.1",
-    "typescript": "^5.3.3"
+    "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": ">=16.8"
