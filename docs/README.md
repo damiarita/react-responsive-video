@@ -77,7 +77,7 @@ npm i @damiarita/react-responsive-video
 
 ### Usage
 
-You have all the details in the [docs](/docs/modules.md#default).
+You have all the details in the [docs](/docs/globals.md#damiaritareact-responsive-video).
 
 The most important prop of the component is sizes. It is an array. Each item of the array should have a media query, an array of video sources, an array of poster image sources, a height and a width. The media query must define the devices where the sources are valid. The video sources should be different formats of the same video (mp4, webm...). The poster image sources should be different formats of the same image (ideally the first frame of the video). The height of the width define the resolution of the poster images and videos (which should have the same resolution).
 
