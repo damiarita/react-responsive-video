@@ -27,7 +27,7 @@
   },
   "homepage": "https://github.com/damiarita/react-responsive-video#readme",
   "devDependencies": {
-    "@babel/preset-env": "^7.23.9",
+    "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.24.1",
     "@eslint/compat": "^2.0.0",
