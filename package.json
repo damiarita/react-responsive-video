@@ -33,7 +33,7 @@
     "@eslint/compat": "^2.0.0",
     "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.2",
-    "@testing-library/react": "^14.2.1",
+    "@testing-library/react": "^16.3.1",
     "@types/jest": "^29.5.12",
     "@types/react-test-renderer": "^19.1.0",
     "@typescript-eslint/eslint-plugin": "^8.52.0",
