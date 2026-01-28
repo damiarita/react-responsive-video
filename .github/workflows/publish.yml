@@ -6,6 +6,7 @@ jobs:
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
+    environment: npm
     permissions:
       contents: read
       id-token: write  # This is necessary to use NPM's Trusted Publisher Connection
