@@ -6,6 +6,9 @@ jobs:
   publish:
     name: Publish to NPM
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write  # This is necessary to use NPM's Trusted Publisher Connection
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -34,4 +37,4 @@ jobs:
         run: npm run build
 
       - name: Publish Package to npm
-        run: npm publish --access public
+        run: npm publish --provenance --access public
