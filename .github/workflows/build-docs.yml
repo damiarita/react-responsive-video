@@ -5,14 +5,14 @@ jobs:
     name: Build docs from JSDoc
     runs-on: ubuntu-latest
     permissions:
-      # Give the default GITHUB_TOKEN read permissions only
-      contents: read
-      pull-requests: read
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }}
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -28,6 +28,7 @@ jobs:
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: Update docs based on TypeDocs
           title: 'docs: Update TypeDocs'
           body: 'Automated update of documentation from TypeDocs'
