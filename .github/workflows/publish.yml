@@ -12,7 +12,7 @@ jobs:
       id-token: write # This is necessary to use NPM's Trusted Publisher Connection
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.ref }} # Ensure it fetches the correct ref
 
