@@ -17,7 +17,7 @@ jobs:
           ref: ${{ github.ref }} # Ensure it fetches the correct ref
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '24'
           registry-url: 'https://registry.npmjs.org'
