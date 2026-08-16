@@ -25,6 +25,6 @@ jobs:
         run: npm run docs
 
       - name: Commit Typedocs
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: Update docs based on TypeDocs
