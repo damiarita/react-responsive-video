@@ -1,5 +1,5 @@
 name: Create Docs
-on: [push, pull_request]
+on: [push]
 jobs:
   docs:
     name: Build docs from JSDoc
@@ -14,7 +14,7 @@ jobs:
           ref: ${{ github.ref }} # Ensure it fetches the correct ref
 
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
 
