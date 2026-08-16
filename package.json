@@ -1,14 +1,24 @@
 {
   "name": "@damiarita/react-responsive-video",
-  "description": "React component to improve peformance of web pages with videos",
+  "description": "React component to improve performance of web pages with videos",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "scripts": {
     "test": "eslint . && jest",
     "build": "tsc",
     "docs": "typedoc",
     "format": "prettier --write .",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
