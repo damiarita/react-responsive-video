@@ -1,8 +1,8 @@
 /**
- * The elements of the array of sizes that are passed to the Responsive Video React Component. Based on the media queries, only one of the element is selected on the client. Sources (both for images and videos) are defined here
+ * A single media source (image or video) for a given Size. One or more Sources make up a Size's videoSources/posterSources arrays.
  * @typedef {Object} Source
  * @property {string} url - The URL where the media can be found
- * @property {string} [format] - A MIME-type to be pased to the <source> element as type.
+ * @property {string} [format] - A MIME-type to be passed to the <source> element as type.
  */
 type Source = {
   url: string;
