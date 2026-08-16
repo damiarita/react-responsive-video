@@ -1,5 +1,9 @@
 name: Create Docs
-on: [push]
+on:
+  push:
+    branches:
+      - master
+
 jobs:
   docs:
     name: Build docs from JSDoc
@@ -11,7 +15,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.ref }}
+          ref: master
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Node.js
@@ -29,6 +34,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          base: master
           commit-message: Update docs based on TypeDocs
           title: 'docs: Update TypeDocs'
           body: 'Automated update of documentation from TypeDocs'
