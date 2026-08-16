@@ -6,7 +6,7 @@
 
 # Type Alias: VideoProps
 
-> **VideoProps** = `Omit`\<`DetailedHTMLProps`\<`VideoHTMLAttributes`\<`HTMLVideoElement`\>, `HTMLVideoElement`\>, `"poster"` \| `"heigth"` \| `"width"`\>
+> **VideoProps** = `Omit`\<`DetailedHTMLProps`\<`VideoHTMLAttributes`\<`HTMLVideoElement`\>, `HTMLVideoElement`\>, `"poster"` \| `"height"` \| `"width"`\>
 
 Defined in: [components/video.tsx:14](https://github.com/damiarita/react-responsive-video/blob/master/src/components/video.tsx#L14)
 
