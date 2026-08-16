@@ -4,7 +4,7 @@ import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, SyntheticEvent } from 'react';
 import useIsClient from '../hooks/useIsClient';
 
 /**
@@ -147,6 +147,11 @@ export default function ReactResponsiveVideo({
   const somethingIsLoaded = posterIsLoaded || videoIsLoaded;
   const setVideoLoadedToTrue = useCallback(() => setVideoIsLoaded(true), []);
 
+  const handleVideoLoadStart = (e: SyntheticEvent<HTMLVideoElement>) => {
+    setVideoLoadedToTrue();
+    videoProps?.onLoadStart?.(e);
+  };
+
   return (
     <>
       {!somethingIsLoaded && (
@@ -155,10 +160,9 @@ export default function ReactResponsiveVideo({
       {isClient && (
         <Video
           show={somethingIsLoaded}
-          videoProps={videoProps}
+          videoProps={{ ...videoProps, onLoadStart: handleVideoLoadStart }}
           sizes={sizes}
           poster={loadedPosterUrl}
-          onLoadStart={setVideoLoadedToTrue}
         />
       )}
     </>

@@ -1,7 +1,7 @@
 import {
   useRef,
   useEffect,
-  SyntheticEvent,
+  useState,
   DetailedHTMLProps,
   VideoHTMLAttributes,
 } from 'react';
@@ -13,7 +13,7 @@ import Size from '../types/size';
  */
 export type VideoProps = Omit<
   DetailedHTMLProps<VideoHTMLAttributes<HTMLVideoElement>, HTMLVideoElement>,
-  'poster' | 'heigth' | 'width'
+  'poster' | 'height' | 'width'
 >;
 
 type Props = {
@@ -21,32 +21,48 @@ type Props = {
   sizes: Size[];
   show: boolean;
   poster?: string;
-  onLoadStart: () => void;
 };
 
-export default function Video({
-  videoProps,
-  sizes,
-  show,
-  poster,
-  onLoadStart,
-}: Props) {
-  const selectedSize = sizes.find(
+function getSelectedSize(sizes: Size[]): Size | undefined {
+  return sizes.find(
     ({ mediaQuery }) =>
       mediaQuery === undefined || window.matchMedia(mediaQuery).matches,
   );
+}
+
+export default function Video({ videoProps, sizes, show, poster }: Props) {
+  const [selectedSize, setSelectedSize] = useState<Size | undefined>(() =>
+    getSelectedSize(sizes),
+  );
+
+  // Re-evaluate which size applies whenever the `sizes` prop itself changes.
+  useEffect(() => {
+    setSelectedSize(getSelectedSize(sizes));
+  }, [sizes]);
+
+  // Re-evaluate on viewport resize too, so the video keeps up with the
+  // poster's native <picture> behaviour instead of only updating whenever
+  // something else happens to re-render this component. This is a cheap
+  // no-op on most resize ticks: `sizes.find` returns the same object
+  // reference until the viewport actually crosses a breakpoint, and React
+  // bails out of re-rendering when the new state is reference-equal to the
+  // old one.
+  useEffect(() => {
+    const handleResize = () => {
+      setSelectedSize(getSelectedSize(sizes));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [sizes]);
+
+  const { children: userChildren, ...restVideoProps } = videoProps ?? {};
+
   const overRidenVideoProps = Object.assign(
     {},
-    videoProps,
+    restVideoProps,
     show ? {} : { style: { display: 'none' } },
-    {
-      onLoadStart: (e: SyntheticEvent<HTMLVideoElement>) => {
-        onLoadStart();
-        if (videoProps?.onLoad) {
-          videoProps.onLoad(e);
-        }
-      },
-    },
   );
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -57,7 +73,9 @@ export default function Video({
     videoRef?.current?.load();
 
     // After loading, restore the time position
-    if (currentTime) videoRef.current.currentTime = currentTime;
+    if (currentTime !== undefined && videoRef.current) {
+      videoRef.current.currentTime = currentTime;
+    }
     // If the video was playing, resume playback
     if (wasPlaying) videoRef?.current?.play();
   }, [selectedSize]);
@@ -77,6 +95,7 @@ export default function Video({
           type={format}
         />
       ))}
+      {userChildren}
     </video>
   );
 }

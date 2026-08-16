@@ -1,4 +1,4 @@
-import { render, act } from '@testing-library/react';
+import { render, act, fireEvent } from '@testing-library/react';
 import ResponsiveVideo from '../src';
 import { pictureProps, imgProps, videoProps, sizes } from './data/fullProps';
 import { sizes as minimalSizes } from './data/minProps';
@@ -150,5 +150,67 @@ describe('Component on the browser', () => {
 
     // Verify that load was called
     expect(mockLoadFn).toHaveBeenCalled();
+  });
+
+  test('forwards a user-supplied onLoadStart handler on the underlying video element', () => {
+    mockWindowWidth = 1300;
+    const handleLoadStart = jest.fn();
+
+    const { container } = render(
+      <ResponsiveVideo
+        sizes={minimalSizes}
+        videoProps={{ onLoadStart: handleLoadStart }}
+      />,
+    );
+
+    const video = container.querySelector('video');
+    act(() => {
+      fireEvent(video, new Event('loadstart'));
+    });
+
+    expect(handleLoadStart).toHaveBeenCalledTimes(1);
+  });
+
+  test('renders children passed via videoProps, e.g. a captions track', () => {
+    mockWindowWidth = 1300;
+
+    const { container } = render(
+      <ResponsiveVideo
+        sizes={minimalSizes}
+        videoProps={{
+          children: (
+            <track
+              kind="captions"
+              src="https://www.example.com/captions.vtt"
+              srcLang="en"
+              label="English"
+            />
+          ),
+        }}
+      />,
+    );
+
+    const track = container.querySelector('track');
+    expect(track).not.toBeNull();
+    expect(track?.getAttribute('src')).toBe(
+      'https://www.example.com/captions.vtt',
+    );
+  });
+
+  test('ignores a stale createPicture result if sizes change before it resolves', () => {
+    mockWindowWidth = 1300;
+    const { container, rerender } = render(<ResponsiveVideo sizes={sizes} />);
+    const staleOnLoad = mockOnLoad;
+
+    // `sizes` changes reference before the first (stale) load resolves.
+    rerender(<ResponsiveVideo sizes={[...minimalSizes]} />);
+
+    act(() => {
+      staleOnLoad('https://www.example.com/stale.jpg');
+    });
+
+    expect(container.querySelector('video')?.getAttribute('poster')).not.toBe(
+      'https://www.example.com/stale.jpg',
+    );
   });
 });
