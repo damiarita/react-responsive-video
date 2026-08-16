@@ -5,9 +5,9 @@ jobs:
     name: Build docs from JSDoc
     runs-on: ubuntu-latest
     permissions:
-      # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
-      contents: write
-      pull-requests: write
+      # Give the default GITHUB_TOKEN read permissions only
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v7

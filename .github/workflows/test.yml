@@ -4,6 +4,10 @@ jobs:
   test:
     name: Test Repo
     runs-on: ubuntu-latest
+    permissions:
+      # Give the default GITHUB_TOKEN read permissions only
+      contents: read
+      pull-requests: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
