@@ -7,11 +7,12 @@ jobs:
     permissions:
       # Give the default GITHUB_TOKEN write permission to commit and push the changed files back to the repository.
       contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }} # Ensure it fetches the correct ref
+          ref: ${{ github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,7 +25,10 @@ jobs:
       - name: Generate docs
         run: npm run docs
 
-      - name: Commit Typedocs
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
         with:
-          commit_message: Update docs based on TypeDocs
+          commit-message: Update docs based on TypeDocs
+          title: 'docs: Update TypeDocs'
+          body: 'Automated update of documentation from TypeDocs'
+          branch: docs/update-typedocs
