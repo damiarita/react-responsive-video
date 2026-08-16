@@ -10,7 +10,7 @@
 
 Defined in: [types/source.ts:7](https://github.com/damiarita/react-responsive-video/blob/master/src/types/source.ts#L7)
 
-The elements of the array of sizes that are passed to the Responsive Video React Component. Based on the media queries, only one of the element is selected on the client. Sources (both for images and videos) are defined here
+A single media source (image or video) for a given Size. One or more Sources make up a Size's videoSources/posterSources arrays.
 
 ## Properties
 
@@ -20,7 +20,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 Defined in: [types/source.ts:9](https://github.com/damiarita/react-responsive-video/blob/master/src/types/source.ts#L9)
 
-A MIME-type to be pased to the <source> element as type.
+A MIME-type to be passed to the <source> element as type.
 
 ***
 
