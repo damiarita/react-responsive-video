@@ -7,6 +7,16 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    groups:
+      jest-packages:
+        patterns:
+          - 'jest*'
+          - 'babel-jest'
+          - '@types/jest'
+      react-packages:
+        patterns:
+          - 'react*'
+          - '@testing-library/react'
   # Enable version updates for GitHub Actions used in the workflows
   - package-ecosystem: 'github-actions'
     directory: '/'
