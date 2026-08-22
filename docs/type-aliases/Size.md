@@ -16,7 +16,7 @@ The elements of the array of sizes that are passed to the Responsive Video React
 
 ### height?
 
-> `optional` **height**: `number`
+> `optional` **height?**: `number`
 
 Defined in: [types/size.ts:13](https://github.com/damiarita/react-responsive-video/blob/master/src/types/size.ts#L13)
 
@@ -26,7 +26,7 @@ The height, in pixels, of the sources included in this element. All the video an
 
 ### mediaQuery?
 
-> `optional` **mediaQuery**: `string`
+> `optional` **mediaQuery?**: `string`
 
 Defined in: [types/size.ts:15](https://github.com/damiarita/react-responsive-video/blob/master/src/types/size.ts#L15)
 
@@ -56,7 +56,7 @@ An array of valid Source elements with video URLs to be used if this Size object
 
 ### width?
 
-> `optional` **width**: `number`
+> `optional` **width?**: `number`
 
 Defined in: [types/size.ts:14](https://github.com/damiarita/react-responsive-video/blob/master/src/types/size.ts#L14)
 

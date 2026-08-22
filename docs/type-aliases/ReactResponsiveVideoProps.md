@@ -16,7 +16,7 @@ The prop type to the Responsive Video React Component
 
 ### imgProps?
 
-> `optional` **imgProps**: [`ImageProps`](ImageProps.md)
+> `optional` **imgProps?**: [`ImageProps`](ImageProps.md)
 
 Defined in: [components/responsiveVideo.tsx:21](https://github.com/damiarita/react-responsive-video/blob/master/src/components/responsiveVideo.tsx#L21)
 
@@ -26,7 +26,7 @@ The props that will be passed to the the React <img> that is inside the <picture
 
 ### pictureProps?
 
-> `optional` **pictureProps**: [`PictureProps`](PictureProps.md)
+> `optional` **pictureProps?**: [`PictureProps`](PictureProps.md)
 
 Defined in: [components/responsiveVideo.tsx:20](https://github.com/damiarita/react-responsive-video/blob/master/src/components/responsiveVideo.tsx#L20)
 
@@ -46,7 +46,7 @@ An array of Size objects that indicate what posters sources and video sources ar
 
 ### videoProps?
 
-> `optional` **videoProps**: [`VideoProps`](VideoProps.md)
+> `optional` **videoProps?**: [`VideoProps`](VideoProps.md)
 
 Defined in: [components/responsiveVideo.tsx:19](https://github.com/damiarita/react-responsive-video/blob/master/src/components/responsiveVideo.tsx#L19)
 
