@@ -16,7 +16,7 @@ A single media source (image or video) for a given Size. One or more Sources mak
 
 ### format?
 
-> `optional` **format**: `string`
+> `optional` **format?**: `string`
 
 Defined in: [types/source.ts:9](https://github.com/damiarita/react-responsive-video/blob/master/src/types/source.ts#L9)
 
