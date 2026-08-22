@@ -58,7 +58,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.5.6",
     "eslint-plugin-react": "^7.34.1",
-    "globals": "^17.0.0",
+    "globals": "^17.11.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "jest": "^30.4.2",
