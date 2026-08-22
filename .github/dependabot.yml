@@ -13,14 +13,10 @@ updates:
           - '@babel/*'
       eslint-packages:
         patterns:
-          - '@eslint/compat'
-          - '@eslint/eslintrc'
-          - '@eslint/js'
+          - '@eslint/*'
           - 'eslint'
-          - '@typescript-eslint/eslint-plugin'
-          - '@typescript-eslint/parser'
-          - 'eslint-config-prettier'
-          - 'eslint-plugin-*'
+          - '@typescript-eslint/*'
+          - 'eslint-*'
       jest-packages:
         patterns:
           - 'jest*'
