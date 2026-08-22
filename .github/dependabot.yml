@@ -8,6 +8,16 @@ updates:
     schedule:
       interval: 'daily'
     groups:
+      eslint-packages:
+        patterns:
+          - '@eslint/compat'
+          - '@eslint/eslintrc'
+          - '@eslint/js'
+          - 'eslint'
+          - '@typescript-eslint/eslint-plugin'
+          - '@typescript-eslint/parser'
+          - 'eslint-config-prettier'
+          - 'eslint-plugin-*'
       jest-packages:
         patterns:
           - 'jest*'
