@@ -7,29 +7,51 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
+    # A dependency joins the FIRST group it matches. Every minor/patch update
+    # lands in `minor-and-patch`, so the groups below only receive majors.
+    # Packages that must move in lockstep (a package and its peers) share a
+    # group, and peers are listed as direct devDependencies so they can be bumped.
     groups:
+      minor-and-patch:
+        update-types:
+          - 'minor'
+          - 'patch'
       babel-packages:
         patterns:
           - '@babel/*'
+          - 'babel-jest'
       eslint-packages:
         patterns:
           - '@eslint/*'
           - 'eslint'
-          - '@typescript-eslint/*'
           - 'eslint-*'
+          - 'globals'
       jest-packages:
         patterns:
           - 'jest*'
-          - 'babel-jest'
           - '@types/jest'
       react-packages:
         patterns:
-          - 'react*'
+          - 'react'
+          - 'react-dom'
+          - '@types/react'
           - '@testing-library/react'
       typescript-packages:
         patterns:
           - 'typescript'
+          - '@typescript-eslint/*'
           - 'typedoc*'
+    ignore:
+      # eslint-plugin-import and eslint-plugin-react don't support ESLint 10 yet.
+      # Remove once their peerDependencies allow eslint@10.
+      - dependency-name: 'eslint'
+        update-types: ['version-update:semver-major']
+      - dependency-name: '@eslint/js'
+        update-types: ['version-update:semver-major']
+      # typescript-eslint and typedoc don't support TypeScript 7 yet (max 6.0.x).
+      # Remove once their peerDependencies allow typescript@7.
+      - dependency-name: 'typescript'
+        versions: ['>=7']
   # Enable version updates for GitHub Actions used in the workflows
   - package-ecosystem: 'github-actions'
     directory: '/'
