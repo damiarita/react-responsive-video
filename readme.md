@@ -80,7 +80,7 @@ Install this package with your preferred JS package manager. As an example, with
 npm i @damiarita/react-responsive-video
 ```
 
-React is a peer dependency. The package is compiled with the automatic JSX runtime (`react/jsx-runtime`), so it needs React 16.14 or newer (React 17+ recommended).
+React is a peer dependency: you need React 16.14 or newer, because the package is compiled with the automatic JSX runtime (`react/jsx-runtime`).
 
 The component works with and without SSR. It is marked with `'use client'`, so it can be imported directly from React Server Components (e.g. the Next.js App Router).
 
@@ -185,7 +185,7 @@ These are the planned improvements, roughly in order of priority. Suggestions an
 - **Better error handling**: warn in development when no item of `sizes` matches the device, and handle autoplay rejections from `video.play()`.
 - **Ref forwarding**: access the underlying `<video>` element to control playback (`play()`, `pause()`...).
 - **Media query listeners**: react to breakpoint changes with `matchMedia` listeners instead of `resize` events (also covers zoom and orientation changes).
-- **Packaging**: ship an ES modules build for tree shaking, test against React 18 and 19, and fix the declared React peer dependency range.
+- **Packaging**: ship an ES modules build for tree shaking and test against every supported React version (16.14 to 19).
 
 ## Contributing
 

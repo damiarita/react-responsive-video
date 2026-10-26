@@ -158,6 +158,11 @@ that match no `<source>`).
   default exports. Files are camelCase.
 - `'use client'` sits at the top of any module using hooks (for Next.js App Router).
 - New public types must be re-exported from [src/index.ts](src/index.ts).
+- `peerDependencies.react` is `>=16.14.0` because `"jsx": "react-jsx"` makes
+  every compiled component `require("react/jsx-runtime")`, which first shipped
+  in React 16.14. Don't switch to the classic runtime (`"jsx": "react"`) to
+  widen it: React 19 logs an "outdated JSX transform" warning for such code.
+  Raise the range if you use a newer React API.
 - Tests: behaviour on the client goes in `client_tests.tsx` (drive the
   poster via the `decode()` mock's `mockOnLoad`/`mockOnError`, the video
   via `fireEvent(video, new Event('loadeddata'))`, breakpoints via `mockWindowWidth` + a `resize` event); server output
@@ -188,6 +193,13 @@ that match no `<source>`).
   **different content**, not just a new array (equal content is covered by
   the `does not reload when re-rendered with an equal but new sizes array`
   test).
+- Type refs as `RefObject<T | null>`: with React 19 types (the devDeps),
+  `useRef<T>(null)` returns `RefObject<T | null>`, and `RefObject<T>` fails
+  `tsc` (it also works with React 18 types). Jest won't catch type errors
+  (Babel strips types), only `npm run build` does.
+- After Dependabot merges, local `node_modules` can be stale (e.g. still
+  React 18 while the lockfile has 19). Run `npm ci` before trusting local
+  build/test results.
 - `imgProps.ref` is ignored: `<Poster>` sets its own `ref` on the `<img>`.
 - `npm run build` (`tsc`) does not clean `dist/`, so files deleted from `src/`
   stay in a local `dist/` until you remove them (CI builds from scratch).
@@ -228,47 +240,44 @@ version requirement), so update it whenever that behaviour changes.
    `useStableSizes` compares the whole array, so e.g. adding a size for
    another breakpoint still reloads the playing video. Keying the reload
    effect on the selected size's `videoSources` would avoid that.
-5. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
-   `"jsx": "react-jsx"`, which requires `react/jsx-runtime` (React ≥16.14 /
-   17). Either narrow the range or switch to the classic runtime. React 19 is
-   not tested (devDeps pin React 18).
 
 ### API / DX improvements
 
-6. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
-7. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
+5. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
+6. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
    global `resize` listener in `useSelectedSize`: it fires only when a breakpoint is crossed,
    and it also covers zoom and orientation changes without polling.
-8. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+7. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
    works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-9. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+8. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
    `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
-10. Accessibility: the `<img alt>` disappears when the video replaces it.
-    The README tells users to pass `aria-label` via `videoProps`; the
-    component could derive one from `imgProps.alt` instead.
-11. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+9. Accessibility: the `<img alt>` disappears when the video replaces it.
+   The README tells users to pass `aria-label` via `videoProps`; the
+   component could derive one from `imgProps.alt` instead.
+10. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
     poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-12. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
+11. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
     shaking; `target: es2016` could be raised.
-13. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+12. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
-14. Add tests for the issues above (e.g. `play()` rejection). Real browser
+13. Add tests for the issues above (e.g. `play()` rejection). Real browser
     behaviour (`decode()` before/after hydration, `loadeddata` vs poster
     race) is not covered by jsdom. A small Playwright suite would catch it.
-15. CI: test against a React version matrix (18, 19); `publish.yml` should
+14. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
+    pin React 19, so older versions are untested); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-16. `.npmignore` is redundant with `"files": ["dist"]` and lists
+15. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-17. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+16. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-18. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+17. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").
