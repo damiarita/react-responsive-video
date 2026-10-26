@@ -8,4 +8,4 @@
 
 > **PictureProps** = `DetailedHTMLProps`\<`HTMLAttributes`\<`HTMLElement`\>, `HTMLElement`\>
 
-Defined in: [components/poster.tsx:4](https://github.com/damiarita/react-responsive-video/blob/master/src/components/poster.tsx#L4)
+Defined in: [components/poster.tsx:9](https://github.com/damiarita/react-responsive-video/blob/master/src/components/poster.tsx#L9)
