@@ -1,9 +1,4 @@
-import {
-  ImgHTMLAttributes,
-  DetailedHTMLProps,
-  HTMLAttributes,
-  RefObject,
-} from 'react';
+import { ImgHTMLAttributes, DetailedHTMLProps, HTMLAttributes } from 'react';
 import Size from '../types/size';
 
 export type PictureProps = DetailedHTMLProps<
@@ -15,11 +10,16 @@ export type ImageProps = DetailedHTMLProps<
   HTMLImageElement
 >;
 
+// A structural type rather than RefObject: `RefObject<HTMLImageElement | null>`
+// (what useRef returns with React 19 types) is rejected by the <img> `ref` of
+// React 18 types, while this shape is accepted by both
+export type ImgRef = { current: HTMLImageElement | null };
+
 type Props = {
   pictureProps?: PictureProps;
   imgProps?: ImageProps;
   sizes: Size[];
-  imgRef: RefObject<HTMLImageElement | null>;
+  imgRef: ImgRef;
 };
 
 export default function Poster({
