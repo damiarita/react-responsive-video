@@ -1,4 +1,9 @@
-import { ImgHTMLAttributes, DetailedHTMLProps, HTMLAttributes } from 'react';
+import {
+  ImgHTMLAttributes,
+  DetailedHTMLProps,
+  HTMLAttributes,
+  RefObject,
+} from 'react';
 import Size from '../types/size';
 
 export type PictureProps = DetailedHTMLProps<
@@ -14,9 +19,15 @@ type Props = {
   pictureProps?: PictureProps;
   imgProps?: ImageProps;
   sizes: Size[];
+  imgRef: RefObject<HTMLImageElement>;
 };
 
-export default function Poster({ pictureProps, imgProps, sizes }: Props) {
+export default function Poster({
+  pictureProps,
+  imgProps,
+  sizes,
+  imgRef,
+}: Props) {
   return (
     <picture {...pictureProps}>
       {sizes.flatMap(({ height, width, mediaQuery, posterSources }) =>
@@ -31,7 +42,7 @@ export default function Poster({ pictureProps, imgProps, sizes }: Props) {
           />
         )),
       )}
-      <img {...imgProps} />
+      <img {...imgProps} ref={imgRef} />
     </picture>
   );
 }

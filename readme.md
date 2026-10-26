@@ -98,7 +98,7 @@ The most important prop of the component is `sizes`. It is an array. Each item o
 
 **The order of `sizes` matters.** On the client, the first item whose `mediaQuery` matches (or that has no `mediaQuery`) is used. Put the most specific media queries first and make the last item a fallback **without** a `mediaQuery`. Otherwise, some devices may match no item and get no video at all.
 
-The component will create a `<video>` tag and some temporary `<picture>` and `<img>` tags. You can pass any props (`id`, `className`, `alt`, `autoPlay`...) to them via `videoProps`, `pictureProps` and `imgProps`. `poster`, `width` and `height` cannot be passed via `videoProps` because they are derived from `sizes`. Any `children` passed via `videoProps` (for example a `<track>` element for captions/subtitles) are rendered inside the `<video>` alongside its sources. Your own event handlers (e.g. `onLoadStart`) are still called.
+The component will create a `<video>` tag and some temporary `<picture>` and `<img>` tags. You can pass any props (`id`, `className`, `alt`, `autoPlay`...) to them via `videoProps`, `pictureProps` and `imgProps`. `poster`, `width` and `height` cannot be passed via `videoProps` because they are derived from `sizes`. Any `children` passed via `videoProps` (for example a `<track>` element for captions/subtitles) are rendered inside the `<video>` alongside its sources. Your own event handlers (e.g. `onLoadedData`) are still called. A `ref` passed via `imgProps` is not supported, because the component uses the `<img>` ref itself.
 
 Keep in mind that the `<img>` (and its `alt`) is removed once the `<video>` is shown. If the video needs an accessible name, pass it to the video too (e.g. `aria-label` in `videoProps`).
 
@@ -176,15 +176,14 @@ There are three different moments during the load of a page that contains the Re
 
 1. Initial page load. If your website uses SSR, the component cannot evaluate the media queries and decide which video sources to give the browser. Therefore, it only renders one `<picture>` element with all the poster `<source>`s. The browser picks the right poster image natively.
 1. Once on the browser, the component can select the correct `<video>` `<source>`s. Therefore, a `<video>` element is rendered. Initially, it is rendered with `display:none` alongside the `<picture>` element. This is because we still don't know which poster image has been chosen by the browser. Adding the video to the DOM makes sure the browser begins downloading the video file (unless you pass `preload: 'none'` in `videoProps`).
-1. As soon as the browser has loaded a poster image, `display:none` is removed from the `<video>`, the `poster` attribute is added to it and the `<picture>` is removed from the DOM. While the video file loads, the user sees the poster image (just like in the previous step). If the video starts loading (its `loadstart` event fires) before the poster image is ready, the same swap happens, without the `poster` attribute until the image is loaded.
+1. As soon as the poster image is ready (even if it was already loaded before your JavaScript ran), `display:none` is removed from the `<video>`, the `poster` attribute is set to the image the browser picked and the `<picture>` is removed from the DOM. While the video file loads, the user keeps seeing the same poster image, now inside the `<video>`. If the video can show its first frame (its `loadeddata` event fires) before the poster image is ready, the same swap happens, and the `poster` attribute is added once the image is ready. If the poster image fails to load, the swap also happens, without a `poster`.
 
 ## Roadmap
 
 These are the planned improvements, roughly in order of priority. Suggestions and PRs are welcome!
 
-- **Smarter swap timing**: swap the `<picture>` for the `<video>` when the video has data to show (instead of when it starts loading), so the poster is not lost during the transition.
-- **Poster follows breakpoints**: update the poster image when a resize changes the selected size.
-- **Better error handling**: don't set a broken URL as `poster` when a poster image fails to load, warn in development when no item of `sizes` matches the device, and handle autoplay rejections from `video.play()`.
+- **Poster follows size changes**: update the poster image when a resize changes the selected size, or when `sizes` changes after the video is shown.
+- **Better error handling**: warn in development when no item of `sizes` matches the device, and handle autoplay rejections from `video.play()`.
 - **Ref forwarding**: access the underlying `<video>` element to control playback (`play()`, `pause()`...).
 - **Media query listeners**: react to breakpoint changes with `matchMedia` listeners instead of `resize` events (also covers zoom and orientation changes).
 - **Packaging**: ship an ES modules build for tree shaking, test against React 18 and 19, and fix the declared React peer dependency range.

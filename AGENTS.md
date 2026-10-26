@@ -27,9 +27,10 @@ downloading **only one** poster image and **one** video.
    containing only the `<source>`s of the first `Size` whose `mediaQuery`
    matches (or has no `mediaQuery`). Being in the DOM makes the browser start
    fetching the video.
-3. **Once "something is loaded"** (the poster image, detected off-DOM, or the
-   video's `loadstart` event): the `<picture>` is removed and the `<video>` is
-   shown with `poster` set to the URL the browser actually picked.
+3. **Once the poster image is ready (or failed), or the video has its first
+   frame (`loadeddata`)**: the `<picture>` is removed and the `<video>` is
+   shown with `poster` set to the URL the browser actually picked (no
+   `poster` if the image failed).
 
 The user is expected to style `<picture>` and `<video>` similarly (e.g.
 `width:100%;height:auto`) so the swap doesn't shift layout.
@@ -61,22 +62,21 @@ src/
   index.ts                     Public entry. Default export = component; re-exports prop/data types.
   components/
     responsiveVideo.tsx        'use client'. Orchestrates Poster ↔ Video swap. Public props type + big JSDoc.
-    poster.tsx                 <picture> with all poster <source>s (SSR-safe, no hooks). Exports PictureProps, ImageProps.
+    poster.tsx                 <picture> with all poster <source>s (SSR-safe, no hooks). Attaches the `imgRef` it
+                               receives to its <img>. Exports PictureProps, ImageProps.
     video.tsx                  Client-only <video>: picks the matching Size, listens to resize, reloads on change.
                                Exports VideoProps (video attrs minus poster/height/width).
   hooks/
     useIsClient.ts             false on server and first client render, true after mount (hydration-safe).
-    useLoadedUrl.ts            Builds an off-DOM <picture> to learn which poster URL the browser chose and
-                               when it finished loading. Cancels stale results when `sizes` changes.
+    useLoadedUrl.ts            Calls decode() on Poster's real <img> to learn when the poster is ready (or
+                               failed) and which URL the browser chose. Cancels stale results when `sizes` changes.
     useStableSizes.ts          Returns the previous `sizes` reference while its JSON content is unchanged
                                (so inline array literals don't re-trigger effects).
-  utils/
-    createPictureElement.ts    Imperative DOM builder used by useLoadedUrl (calls onload/onerror with currentSrc).
   types/
     size.ts                    Size = { height?, width?, mediaQuery?, videoSources: Source[], posterSources: Source[] }
     source.ts                  Source = { url, format? (MIME type) }
 __tests__/
-  client_tests.tsx             jsdom tests (mocks matchMedia, HTMLVideoElement.load/play, createPictureElement).
+  client_tests.tsx             jsdom tests (mocks matchMedia, HTMLVideoElement.load/play, HTMLImageElement.decode).
   ssr_tests.tsx                `@jest-environment node` + renderToStaticMarkup snapshot tests.
   data/{fullProps,minProps,invalidProps}.ts   Shared fixtures.
   __snapshots__/               Jest snapshots (committed).
@@ -94,13 +94,21 @@ dist/                          Build output (git-ignored, the only thing publish
   parents may pass `sizes` inline without reloading the video.
 - `isClient = useIsClient()` → `<Video>` is rendered only after mount, so the
   server HTML and the first client render match (no hydration mismatch).
-- `loadedPosterUrl = useLoadedUrl(sizes)` → `undefined` until the off-DOM
-  `<img>` fires `load` **or `error`** (both set the URL; on error the poster is
-  the failed URL/empty string).
-- `videoIsLoaded` becomes `true` on the video's `loadstart` event. The user's
-  own `videoProps.onLoadStart` is wrapped and still called.
-- `somethingIsLoaded = posterIsLoaded || videoIsLoaded` → hides `<Poster>` and
-  passes `show` to `<Video>`.
+- `poster = useLoadedUrl(posterImgRef, sizes)` → `{ isSettled, url? }`. It
+  awaits `img.decode()` on the **real** poster `<img>` (ref passed to
+  `<Poster>`). Unlike `load`/`error` events, `decode()` also settles for an
+  image that loaded or failed **before hydration**, so an already-painted
+  SSR poster is detected right away. Resolve → `{ isSettled: true, url:
+currentSrc }`; reject → `{ isSettled: true }` (no poster). If `sizes`
+  changes after `<Poster>` is gone, the URL is dropped (it belongs to the old
+  media).
+- `videoIsLoaded` becomes `true` on the video's `loadeddata` event (first
+  frame available), **not** `loadstart`, so the swap never replaces a
+  painted poster with an empty video. The user's own
+  `videoProps.onLoadedData` is wrapped and still called.
+- `somethingIsLoaded = poster.isSettled || videoIsLoaded` → hides `<Poster>`
+  and passes `show` to `<Video>`. If the browser never preloads the video
+  (iOS, `preload="none"`) the poster path alone triggers the swap.
 
 `Video` ([src/components/video.tsx](src/components/video.tsx)):
 
@@ -135,8 +143,8 @@ that match no `<source>`).
 - `'use client'` sits at the top of any module using hooks (for Next.js App Router).
 - New public types must be re-exported from [src/index.ts](src/index.ts).
 - Tests: behaviour on the client goes in `client_tests.tsx` (drive the
-  mocked `createPictureElement` callbacks via `mockOnLoad`/`mockOnError`,
-  drive breakpoints via `mockWindowWidth` + a `resize` event); server output
+  poster via the `decode()` mock's `mockOnLoad`/`mockOnError`, the video
+  via `fireEvent(video, new Event('loadeddata'))`, breakpoints via `mockWindowWidth` + a `resize` event); server output
   goes in `ssr_tests.tsx`. The `matchMedia` mock only understands
   `(min-width: Npx)`.
 
@@ -164,16 +172,18 @@ that match no `<source>`).
   **different content**, not just a new array (equal content is covered by
   the `does not reload when re-rendered with an equal but new sizes array`
   test).
-- `loadstart` fires when fetching **starts**, not when the video is playable, so
-  in practice the picture is often swapped for the video before the poster
-  image has loaded.
+- `imgProps.ref` is ignored: `<Poster>` sets its own `ref` on the `<img>`.
+- `npm run build` (`tsc`) does not clean `dist/`, so files deleted from `src/`
+  stay in a local `dist/` until you remove them (CI builds from scratch).
 - The client test mocks `document.createElement` globally for `video`; if you
   create videos elsewhere in tests they'll get the mocked `load/play/pause`.
 - `jest.config.js` has `modulePathIgnorePatterns: ['data']`, a regex that
   ignores **any** path containing `data` (not only `__tests__/data`). Avoid that
   substring in new file/dir names or narrow the pattern.
-- `createPictureElement` is mocked in every client test, so its real logic
-  has ~7% coverage.
+- jsdom has no `img.decode()`; `client_tests.tsx` defines it on
+  `HTMLImageElement.prototype`. Settle it with `mockOnLoad(url)` /
+  `mockOnError()` inside `await act(async () => …)` (it is a promise, so a
+  sync `act` is not enough).
 
 ## Possible improvements & known issues
 
@@ -181,79 +191,76 @@ Ordered roughly by user impact. When you fix one, remove it (or update it) in
 the same commit. The user-facing **Roadmap** section of
 [readme.md](readme.md) summarises the items users would notice. Keep it in
 sync when items are fixed or added. The README also documents current
-behaviour (the `loadstart` swap, inline `sizes` being safe, the React
+behaviour (what triggers the swap, inline `sizes` being safe, the React
 version requirement), so update it whenever that behaviour changes.
 
 ### Bugs / behavioural issues
 
-1. **"Video loaded" is actually `loadstart`.** It fires almost immediately
-   after the hidden `<video>` mounts, so the poster `<picture>` is usually
-   removed before the poster image is known and the video is shown with no
-   `poster` (blank/black box until the first frame or poster arrives).
-   Consider `onLoadedData`/`onCanPlay` instead (keep in mind `preload="none"`,
-   where only the poster path would then trigger the swap).
-2. **Poster is not updated on breakpoint changes.** `Video` switches sources
+1. **Poster is not updated on breakpoint changes.** `Video` switches sources
    and `width`/`height` on resize, but `loadedPosterUrl` stays the poster of
    the original size, so a paused/not-yet-started video can show a poster
-   with the wrong aspect ratio.
-3. **Poster load errors are treated as success.** `onerror` sets
-   `loadedUrl` to the failed `currentSrc` (possibly `''`), so the video
-   gets a broken or empty `poster`. Prefer leaving `poster` undefined on
-   error while still allowing the swap.
-4. **No matching `Size`** (no fallback without `mediaQuery`): the video
+   with the wrong aspect ratio. Likewise, when `sizes` changes after the
+   swap the poster is simply dropped, not replaced, because the `<img>` that
+   detected it is gone. A fix needs a way to learn the new poster without
+   the on-page `<picture>` (e.g. a detached `new Image()` with the selected
+   size's `posterSources`).
+2. **`decode()` rejects if the browser switches source mid-load** (the
+   viewport crosses a poster breakpoint before the image is ready). That is
+   treated as a failure, so the video is shown without a poster. Could retry
+   `decode()` when `img.currentSrc` changed.
+3. **No matching `Size`** (no fallback without `mediaQuery`): the video
    renders with no sources and no dimensions; nothing warns the user. Add
    a dev-mode `console.warn`, or document the requirement more prominently.
-5. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
+4. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
    policies reject it). Add `.catch(() => {})` or surface it.
-6. **`video.load()` is called on mount** even though the browser already
+5. **`video.load()` is called on mount** even though the browser already
    loads the initial sources, which may cause a duplicate request. Skip the
    first run of that effect.
-7. **Real `sizes` changes reload even when the chosen sources don't.**
+6. **Real `sizes` changes reload even when the chosen sources don't.**
    `useStableSizes` compares the whole array, so e.g. adding a size for
    another breakpoint still reloads the playing video. Keying the reload
    effect on the selected size's `videoSources` would avoid that.
-8. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
+7. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
    `"jsx": "react-jsx"`, which requires `react/jsx-runtime` (React ≥16.14 /
    17). Either narrow the range or switch to the classic runtime. React 19 is
    not tested (devDeps pin React 18).
 
 ### API / DX improvements
 
-9. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
-10. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
-    global `resize` listener: it fires only when a breakpoint is crossed,
-    and it also covers zoom and orientation changes without polling.
-11. Clean up the off-DOM `<img>` on effect cleanup (null the handlers, drop
-    `srcset`) so cancelled loads don't keep downloading.
-12. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+8. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
+9. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
+   global `resize` listener: it fires only when a breakpoint is crossed,
+   and it also covers zoom and orientation changes without polling.
+10. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
     works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-13. Give hooks and the util named functions (`useIsClient`, `useLoadedUrl`,
-    `createPictureElement`) for nicer stack traces and DevTools names.
-14. Accessibility: the `<img alt>` disappears when the video replaces it.
+11. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+    `useStableSizes`) for nicer stack traces and DevTools names.
+12. Accessibility: the `<img alt>` disappears when the video replaces it.
     The README tells users to pass `aria-label` via `videoProps`; the
     component could derive one from `imgProps.alt` instead.
-15. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+13. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
     poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-16. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
+14. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
     shaking; `target: es2016` could be raised.
-17. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
-    `tsconfig` `include`; e.g. `let mockOnLoad, mockOnError` are implicit `any`).
-18. Add real tests for `createPictureElement` (it's mocked everywhere) and
-    for the issues above (`play()` rejection, error poster).
-19. CI: test against a React version matrix (18, 19); `publish.yml` should
+15. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+    `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
+16. Add tests for the issues above (e.g. `play()` rejection). Real browser
+    behaviour (`decode()` before/after hydration, `loadeddata` vs poster
+    race) is not covered by jsdom. A small Playwright suite would catch it.
+17. CI: test against a React version matrix (18, 19); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-20. `.npmignore` is redundant with `"files": ["dist"]` and lists
+18. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-21. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+19. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-22. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+20. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").

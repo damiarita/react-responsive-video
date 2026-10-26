@@ -232,7 +232,7 @@ exports[`Component on the browser updates on window resize with full props and c
 <DocumentFragment>
   <video
     height="1024"
-    poster="https://www.example.com/tablet.webp"
+    poster="https://www.example.com/desktop.webp"
     style="width: auto;"
     width="1024"
   >

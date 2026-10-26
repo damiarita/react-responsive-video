@@ -4,7 +4,7 @@ import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import { useState, useCallback, SyntheticEvent } from 'react';
+import { useState, useCallback, useRef, SyntheticEvent } from 'react';
 import useIsClient from '../hooks/useIsClient';
 import useStableSizes from '../hooks/useStableSizes';
 
@@ -133,7 +133,7 @@ export type ReactResponsiveVideoProps = {
  *     ]}
  * />
  * ```
- * @returns {React.ReactElement} A React Component that produces: 1-> On SSR, a <picture> element with all the poster sources for the browser to choose; 2->Once on the client, the same <picture> element with an additional <video> element which has the correct video sources for the device, no poster image and has display:none (its job is to tell the browser to start downloading the video) and 3-> when either the poster image or the video are loaded, only the <video> element which has the correct video sources for the device and the loaded poster image
+ * @returns {React.ReactElement} A React Component that produces: 1-> On SSR, a <picture> element with all the poster sources for the browser to choose; 2->Once on the client, the same <picture> element with an additional <video> element which has the correct video sources for the device, no poster image and has display:none (its job is to tell the browser to start downloading the video) and 3-> when either the poster image is ready (or failed) or the video has data to show its first frame, only the <video> element which has the correct video sources for the device and the loaded poster image
  */
 export default function ReactResponsiveVideo({
   pictureProps,
@@ -143,28 +143,35 @@ export default function ReactResponsiveVideo({
 }: ReactResponsiveVideoProps) {
   const sizes = useStableSizes(sizesProp);
   const isClient = useIsClient();
-  const loadedPosterUrl = useLoadedUrl(sizes);
+  const posterImgRef = useRef<HTMLImageElement>(null);
+  const poster = useLoadedUrl(posterImgRef, sizes);
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);
-  const posterIsLoaded = loadedPosterUrl !== undefined;
-  const somethingIsLoaded = posterIsLoaded || videoIsLoaded;
+  const somethingIsLoaded = poster.isSettled || videoIsLoaded;
   const setVideoLoadedToTrue = useCallback(() => setVideoIsLoaded(true), []);
 
-  const handleVideoLoadStart = (e: SyntheticEvent<HTMLVideoElement>) => {
+  // loadeddata (not loadstart) so the video only replaces the poster once it
+  // can show its first frame
+  const handleVideoLoadedData = (e: SyntheticEvent<HTMLVideoElement>) => {
     setVideoLoadedToTrue();
-    videoProps?.onLoadStart?.(e);
+    videoProps?.onLoadedData?.(e);
   };
 
   return (
     <>
       {!somethingIsLoaded && (
-        <Poster pictureProps={pictureProps} imgProps={imgProps} sizes={sizes} />
+        <Poster
+          pictureProps={pictureProps}
+          imgProps={imgProps}
+          sizes={sizes}
+          imgRef={posterImgRef}
+        />
       )}
       {isClient && (
         <Video
           show={somethingIsLoaded}
-          videoProps={{ ...videoProps, onLoadStart: handleVideoLoadStart }}
+          videoProps={{ ...videoProps, onLoadedData: handleVideoLoadedData }}
           sizes={sizes}
-          poster={loadedPosterUrl}
+          poster={poster.url}
         />
       )}
     </>
