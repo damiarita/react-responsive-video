@@ -18,7 +18,7 @@ type PosterState = {
 // for the video, a breakpoint change loads the new size's poster in a detached
 // <picture>. The previous poster is kept until the new one is ready.
 export default function (
-  imgRef: RefObject<HTMLImageElement>,
+  imgRef: RefObject<HTMLImageElement | null>,
   selectedSize: Size | undefined,
 ): PosterState {
   const [posterState, setPosterState] = useState<PosterState>({

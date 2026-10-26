@@ -19,7 +19,7 @@ type Props = {
   pictureProps?: PictureProps;
   imgProps?: ImageProps;
   sizes: Size[];
-  imgRef: RefObject<HTMLImageElement>;
+  imgRef: RefObject<HTMLImageElement | null>;
 };
 
 export default function Poster({
