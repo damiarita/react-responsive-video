@@ -34,15 +34,24 @@ export default function (
       return;
     }
     let cancelled = false;
-    img.decode().then(
-      () => {
-        if (!cancelled)
-          setPosterState({ isSettled: true, url: img.currentSrc });
-      },
-      () => {
-        if (!cancelled) setPosterState({ isSettled: true });
-      },
-    );
+    const waitForPoster = () => {
+      const src = img.currentSrc;
+      img.decode().then(
+        () => {
+          if (!cancelled)
+            setPosterState({ isSettled: true, url: img.currentSrc });
+        },
+        () => {
+          if (cancelled) return;
+          // decode() also rejects when the browser switches to another source
+          // while loading (e.g. a poster breakpoint was crossed). That is not a
+          // failure: wait for the new source instead.
+          if (img.currentSrc !== src) waitForPoster();
+          else setPosterState({ isSettled: true });
+        },
+      );
+    };
+    waitForPoster();
     return () => {
       cancelled = true;
     };

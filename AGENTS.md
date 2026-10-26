@@ -113,7 +113,10 @@ matchMedia(s.mediaQuery).matches)`. **Order matters**: first match wins, so
   `<Poster>`). Unlike `load`/`error` events, `decode()` also settles for an
   image that loaded or failed **before hydration**, so an already-painted
   SSR poster is detected right away. Resolve → `{ isSettled: true, url:
-currentSrc }`; reject → `{ isSettled: true }` (no poster). After the swap
+currentSrc }`; reject → `{ isSettled: true }` (no poster), **unless
+  `currentSrc` changed** during the wait: `decode()` also rejects when the
+  browser switches to another source mid-load (a poster breakpoint crossed,
+  zoom...), so it then waits for the new source with another `decode()`. After the swap
   (`<Poster>` unmounted), a new `selectedSize` (breakpoint crossed or
   `sizes` changed) loads that size's posters in a detached `<picture>`
   (`createPosterImage`) so the browser still negotiates the format. The old
@@ -196,7 +199,9 @@ that match no `<source>`).
 - jsdom has no `img.decode()`; `client_tests.tsx` defines it on
   `HTMLImageElement.prototype`. Settle it with `mockOnLoad(url)` /
   `mockOnError()` inside `await act(async () => …)` (it is a promise, so a
-  sync `act` is not enough). They settle the **latest** `decode()` call;
+  sync `act` is not enough). `mockOnSourceSwitch(url)` simulates the browser
+  switching source mid-load (sets `currentSrc`, then rejects). They settle the
+  **latest** `decode()` call;
   `mockDecodeFn.mock.contexts.at(-1)` is the `<img>` it was called on (the
   page one or a detached one).
 
@@ -211,66 +216,59 @@ version requirement), so update it whenever that behaviour changes.
 
 ### Bugs / behavioural issues
 
-1. **`decode()` can reject if the browser switches source mid-load** (the
-   viewport crosses a poster breakpoint before the on-page image is ready).
-   Partly mitigated: the new `selectedSize` re-runs `decode()` on the
-   on-page `<img>`. But if the browser swaps the `<img>` request _after_ that
-   call, it still rejects, which is treated as a failure, so the video is
-   shown without a poster. Could retry `decode()` when `img.currentSrc`
-   changed.
-2. **No matching `Size`** (no fallback without `mediaQuery`): the video
+1. **No matching `Size`** (no fallback without `mediaQuery`): the video
    renders with no sources and no dimensions; nothing warns the user. Add
    a dev-mode `console.warn`, or document the requirement more prominently.
-3. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
+2. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
    policies reject it). Add `.catch(() => {})` or surface it.
-4. **`video.load()` is called on mount** even though the browser already
+3. **`video.load()` is called on mount** even though the browser already
    loads the initial sources, which may cause a duplicate request. Skip the
    first run of that effect.
-5. **Real `sizes` changes reload even when the chosen sources don't.**
+4. **Real `sizes` changes reload even when the chosen sources don't.**
    `useStableSizes` compares the whole array, so e.g. adding a size for
    another breakpoint still reloads the playing video. Keying the reload
    effect on the selected size's `videoSources` would avoid that.
-6. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
+5. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
    `"jsx": "react-jsx"`, which requires `react/jsx-runtime` (React ≥16.14 /
    17). Either narrow the range or switch to the classic runtime. React 19 is
    not tested (devDeps pin React 18).
 
 ### API / DX improvements
 
-7. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
-8. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
+6. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
+7. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
    global `resize` listener in `useSelectedSize`: it fires only when a breakpoint is crossed,
    and it also covers zoom and orientation changes without polling.
-9. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+8. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
    works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-10. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
-    `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
-11. Accessibility: the `<img alt>` disappears when the video replaces it.
+9. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+   `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
+10. Accessibility: the `<img alt>` disappears when the video replaces it.
     The README tells users to pass `aria-label` via `videoProps`; the
     component could derive one from `imgProps.alt` instead.
-12. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+11. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
     poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-13. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
+12. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
     shaking; `target: es2016` could be raised.
-14. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+13. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
-15. Add tests for the issues above (e.g. `play()` rejection). Real browser
+14. Add tests for the issues above (e.g. `play()` rejection). Real browser
     behaviour (`decode()` before/after hydration, `loadeddata` vs poster
     race) is not covered by jsdom. A small Playwright suite would catch it.
-16. CI: test against a React version matrix (18, 19); `publish.yml` should
+15. CI: test against a React version matrix (18, 19); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-17. `.npmignore` is redundant with `"files": ["dist"]` and lists
+16. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-18. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+17. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-19. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+18. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").

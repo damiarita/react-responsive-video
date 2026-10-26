@@ -9,7 +9,7 @@ let mockWindowWidth = 0;
 
 // jsdom has no img.decode(). Each call stores how to settle it, which tests
 // do to simulate the browser finishing (or failing) to load the poster image.
-let mockOnLoad, mockOnError;
+let mockOnLoad, mockOnError, mockOnSourceSwitch;
 const mockDecodeFn = jest.fn(function () {
   const img = this;
   return new Promise((resolve, reject) => {
@@ -21,6 +21,15 @@ const mockDecodeFn = jest.fn(function () {
       resolve();
     };
     mockOnError = () => reject(new Error('EncodingError'));
+    // The browser picked another source mid-load: decode() rejects and
+    // currentSrc already points to the new source
+    mockOnSourceSwitch = (url) => {
+      Object.defineProperty(img, 'currentSrc', {
+        configurable: true,
+        value: url,
+      });
+      reject(new Error('EncodingError'));
+    };
   });
 });
 Object.defineProperty(HTMLImageElement.prototype, 'decode', {
@@ -187,6 +196,28 @@ describe('Component on the browser', () => {
     expect(handleLoadedData).toHaveBeenCalledTimes(1);
     expect(container.querySelector('picture')).toBeNull();
     expect(video?.style.display).toBe('');
+  });
+
+  test('waits for the new poster if the browser switches source mid-load', async () => {
+    mockWindowWidth = 1300;
+    const { container } = render(<ResponsiveVideo sizes={sizes} />);
+    const decodeCallsBefore = mockDecodeFn.mock.calls.length;
+
+    await act(async () => {
+      mockOnSourceSwitch('https://www.example.com/tablet.webp');
+    });
+
+    // Not treated as a failure: the poster is still shown and awaited again
+    expect(container.querySelector('picture')).not.toBeNull();
+    expect(mockDecodeFn).toHaveBeenCalledTimes(decodeCallsBefore + 1);
+
+    await act(async () => {
+      mockOnLoad('https://www.example.com/tablet.webp');
+    });
+    expect(container.querySelector('picture')).toBeNull();
+    expect(container.querySelector('video')?.getAttribute('poster')).toBe(
+      'https://www.example.com/tablet.webp',
+    );
   });
 
   test('shows the video without a poster if the poster image fails', async () => {
