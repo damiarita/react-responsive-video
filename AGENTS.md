@@ -68,6 +68,8 @@ src/
     useIsClient.ts             false on server and first client render, true after mount (hydration-safe).
     useLoadedUrl.ts            Builds an off-DOM <picture> to learn which poster URL the browser chose and
                                when it finished loading. Cancels stale results when `sizes` changes.
+    useStableSizes.ts          Returns the previous `sizes` reference while its JSON content is unchanged
+                               (so inline array literals don't re-trigger effects).
   utils/
     createPictureElement.ts    Imperative DOM builder used by useLoadedUrl (calls onload/onerror with currentSrc).
   types/
@@ -86,6 +88,10 @@ dist/                          Build output (git-ignored, the only thing publish
 
 `ReactResponsiveVideo` ([src/components/responsiveVideo.tsx](src/components/responsiveVideo.tsx)):
 
+- `sizes = useStableSizes(sizesProp)` runs first, and **everything below
+  (Poster, Video, useLoadedUrl) receives this stabilised array**. Its
+  reference only changes when `JSON.stringify(sizes)` changes, so
+  parents may pass `sizes` inline without reloading the video.
 - `isClient = useIsClient()` → `<Video>` is rendered only after mount, so the
   server HTML and the first client render match (no hydration mismatch).
 - `loadedPosterUrl = useLoadedUrl(sizes)` → `undefined` until the off-DOM
@@ -151,11 +157,13 @@ that match no `<source>`).
 
 ## Gotchas
 
-- `sizes` identity matters. Both `useLoadedUrl` and `Video` depend on `[sizes]`
-  and on the identity of each `Size` object. A new array of new objects with
-  the same content creates a new off-DOM picture **and** calls `video.load()`
-  again (verified: 2 re-renders with an inline literal → 2 extra `load()` calls).
-  Tests that need a "changed sizes" scenario rely on this.
+- `useLoadedUrl` and `Video` depend on `[sizes]` and on the identity of each
+  `Size` object. Internally they are only safe because `ReactResponsiveVideo`
+  passes them the output of `useStableSizes`. Never pass the raw `sizes` prop
+  to new hooks/children. In tests, a "changed sizes" scenario needs
+  **different content**, not just a new array (equal content is covered by
+  the `does not reload when re-rendered with an equal but new sizes array`
+  test).
 - `loadstart` fires when fetching **starts**, not when the video is playable, so
   in practice the picture is often swapped for the video before the poster
   image has loaded.
@@ -173,41 +181,37 @@ Ordered roughly by user impact. When you fix one, remove it (or update it) in
 the same commit. The user-facing **Roadmap** section of
 [readme.md](readme.md) summarises the items users would notice. Keep it in
 sync when items are fixed or added. The README also documents current
-behaviour (the `loadstart` swap, the "keep `sizes` stable" note, the React
+behaviour (the `loadstart` swap, inline `sizes` being safe, the React
 version requirement), so update it whenever that behaviour changes.
 
 ### Bugs / behavioural issues
 
-1. **Video reloads on every parent re-render with an inline `sizes` literal**
-   (the README warns about it as a workaround). `getSelectedSize` returns a new object →
-   `selectedSize` changes → `video.load()` (re-buffer, possible flicker) and
-   `useLoadedUrl` builds a new off-DOM picture. Fix: key the selection by index
-   or by a stable signature (e.g. `mediaQuery` + source URLs) and only reload
-   when the chosen _sources_ change; consider memoising `sizes` internally
-   by a content hash. Once fixed, drop the "Keep `sizes` stable" note
-   from the README.
-2. **"Video loaded" is actually `loadstart`.** It fires almost immediately
+1. **"Video loaded" is actually `loadstart`.** It fires almost immediately
    after the hidden `<video>` mounts, so the poster `<picture>` is usually
    removed before the poster image is known and the video is shown with no
    `poster` (blank/black box until the first frame or poster arrives).
    Consider `onLoadedData`/`onCanPlay` instead (keep in mind `preload="none"`,
    where only the poster path would then trigger the swap).
-3. **Poster is not updated on breakpoint changes.** `Video` switches sources
+2. **Poster is not updated on breakpoint changes.** `Video` switches sources
    and `width`/`height` on resize, but `loadedPosterUrl` stays the poster of
    the original size, so a paused/not-yet-started video can show a poster
    with the wrong aspect ratio.
-4. **Poster load errors are treated as success.** `onerror` sets
+3. **Poster load errors are treated as success.** `onerror` sets
    `loadedUrl` to the failed `currentSrc` (possibly `''`), so the video
    gets a broken or empty `poster`. Prefer leaving `poster` undefined on
    error while still allowing the swap.
-5. **No matching `Size`** (no fallback without `mediaQuery`): the video
+4. **No matching `Size`** (no fallback without `mediaQuery`): the video
    renders with no sources and no dimensions; nothing warns the user. Add
    a dev-mode `console.warn`, or document the requirement more prominently.
-6. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
+5. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
    policies reject it). Add `.catch(() => {})` or surface it.
-7. **`video.load()` is called on mount** even though the browser already
+6. **`video.load()` is called on mount** even though the browser already
    loads the initial sources, which may cause a duplicate request. Skip the
    first run of that effect.
+7. **Real `sizes` changes reload even when the chosen sources don't.**
+   `useStableSizes` compares the whole array, so e.g. adding a size for
+   another breakpoint still reloads the playing video. Keying the reload
+   effect on the selected size's `videoSources` would avoid that.
 8. **`peerDependencies.react: ">=16.8"` is inaccurate.** The build uses
    `"jsx": "react-jsx"`, which requires `react/jsx-runtime` (React ≥16.14 /
    17). Either narrow the range or switch to the classic runtime. React 19 is
@@ -238,7 +242,7 @@ version requirement), so update it whenever that behaviour changes.
 17. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. `let mockOnLoad, mockOnError` are implicit `any`).
 18. Add real tests for `createPictureElement` (it's mocked everywhere) and
-    for the issues above (inline `sizes`, `play()` rejection, error poster).
+    for the issues above (`play()` rejection, error poster).
 19. CI: test against a React version matrix (18, 19); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).

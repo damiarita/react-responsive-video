@@ -197,6 +197,22 @@ describe('Component on the browser', () => {
     );
   });
 
+  test('does not reload when re-rendered with an equal but new sizes array', () => {
+    mockWindowWidth = 1300;
+    // Simulates `sizes` written inline in JSX: new objects, same content.
+    const inlineSizes = () => JSON.parse(JSON.stringify(sizes));
+    const { rerender } = render(<ResponsiveVideo sizes={inlineSizes()} />);
+    const loadCallsAfterMount = mockLoadFn.mock.calls.length;
+    const onLoadAfterMount = mockOnLoad;
+
+    rerender(<ResponsiveVideo sizes={inlineSizes()} />);
+    rerender(<ResponsiveVideo sizes={inlineSizes()} />);
+
+    expect(mockLoadFn).toHaveBeenCalledTimes(loadCallsAfterMount);
+    // No new off-DOM picture was created either.
+    expect(mockOnLoad).toBe(onLoadAfterMount);
+  });
+
   test('ignores a stale createPicture result if sizes change before it resolves', () => {
     mockWindowWidth = 1300;
     const { container, rerender } = render(<ResponsiveVideo sizes={sizes} />);

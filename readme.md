@@ -109,8 +109,7 @@ import ReactResponsiveVideo, {
   type Size,
 } from '@damiarita/react-responsive-video';
 
-// Defined outside the component (or memoized with useMemo) so it keeps the
-// same identity between renders. See the note below.
+// It can also be written inline in the JSX (see the note below)
 const sizes: Size[] = [
   {
     width: 2000,
@@ -167,7 +166,7 @@ export default function Hero() {
 
 Make sure that your `pictureProps` and your `videoProps` give similar styles via class or style (i.e: `width:100%;height:auto;`) so that replacing the `<picture>` by the `<video>` does not change the layout.
 
-> **Keep `sizes` stable between renders.** Define it outside your component or wrap it in `useMemo`. If you write the array inline in your JSX, a new array is created on every render of the parent. The component then treats it as new sources and reloads the video.
+> **Writing `sizes` inline is fine.** The component compares the _content_ of `sizes`, not the array reference. Re-rendering the parent with an equal (even if newly created) array does not reload the video. The video is only reloaded when the content of `sizes` actually changes.
 
 All the props and types are documented in the [API docs](https://github.com/damiarita/react-responsive-video/blob/master/docs/functions/default.md). The types (`ReactResponsiveVideoProps`, `Size`, `Source`, `VideoProps`, `PictureProps` and `ImageProps`) are exported from the package.
 
@@ -183,7 +182,6 @@ There are three different moments during the load of a page that contains the Re
 
 These are the planned improvements, roughly in order of priority. Suggestions and PRs are welcome!
 
-- **Stable `sizes` handling**: detect when `sizes` has the same content as before, so inline arrays no longer reload the video.
 - **Smarter swap timing**: swap the `<picture>` for the `<video>` when the video has data to show (instead of when it starts loading), so the poster is not lost during the transition.
 - **Poster follows breakpoints**: update the poster image when a resize changes the selected size.
 - **Better error handling**: don't set a broken URL as `poster` when a poster image fails to load, warn in development when no item of `sizes` matches the device, and handle autoplay rejections from `video.play()`.
