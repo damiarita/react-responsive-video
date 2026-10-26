@@ -96,7 +96,7 @@ The most important prop of the component is `sizes`. It is an array. Each item o
 | `width`         | no       | Width, in pixels, of the videos and poster images of this item (both should have the same resolution).           |
 | `height`        | no       | Height, in pixels, of the videos and poster images of this item. Together with `width`, it avoids layout shifts. |
 
-**The order of `sizes` matters.** On the client, the first item whose `mediaQuery` matches (or that has no `mediaQuery`) is used. Put the most specific media queries first and make the last item a fallback **without** a `mediaQuery`. Otherwise, some devices may match no item and get no video at all.
+**The order of `sizes` matters.** On the client, the first item whose `mediaQuery` matches (or that has no `mediaQuery`) is used. Put the most specific media queries first and make the last item a fallback **without** a `mediaQuery`. Otherwise, some devices may match no item and get no video at all (in development, the component logs a warning when that happens).
 
 The component will create a `<video>` tag and some temporary `<picture>` and `<img>` tags. You can pass any props (`id`, `className`, `alt`, `autoPlay`...) to them via `videoProps`, `pictureProps` and `imgProps`. `poster`, `width` and `height` cannot be passed via `videoProps` because they are derived from `sizes`. Any `children` passed via `videoProps` (for example a `<track>` element for captions/subtitles) are rendered inside the `<video>` alongside its sources. Your own event handlers (e.g. `onLoadedData`) are still called. A `ref` passed via `imgProps` is not supported, because the component uses the `<img>` ref itself.
 
@@ -182,7 +182,7 @@ There are three different moments during the load of a page that contains the Re
 
 These are the planned improvements, roughly in order of priority. Suggestions and PRs are welcome!
 
-- **Better error handling**: warn in development when no item of `sizes` matches the device, and handle autoplay rejections from `video.play()`.
+- **Better error handling**: handle autoplay rejections from `video.play()`.
 - **Ref forwarding**: access the underlying `<video>` element to control playback (`play()`, `pause()`...).
 - **Media query listeners**: react to breakpoint changes with `matchMedia` listeners instead of `resize` events (also covers zoom and orientation changes).
 - **Packaging**: ship an ES modules build for tree shaking and test against every supported React version (16.14 to 19).

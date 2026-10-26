@@ -22,8 +22,21 @@ export default function (sizes: Size[]) {
   // bails out of re-rendering when the new state is reference-equal to the
   // old one.
   useEffect(() => {
+    let warned = false;
     const updateSelectedSize = () => {
-      setSelectedSize(getSelectedSize(sizes));
+      const size = getSelectedSize(sizes);
+      // Without a match the video has no sources and silently stays empty.
+      // Warn once per `sizes` (not on every resize tick), in development only.
+      if (process.env.NODE_ENV !== 'production' && !size && !warned) {
+        warned = true;
+        console.warn(
+          '[react-responsive-video] No item of `sizes` matches the current ' +
+            'viewport, so the video has no sources. Add a last item without ' +
+            'a `mediaQuery` as a fallback. Media queries: ' +
+            sizes.map(({ mediaQuery }) => mediaQuery).join(', '),
+        );
+      }
+      setSelectedSize(size);
     };
     updateSelectedSize();
     window.addEventListener('resize', updateSelectedSize);

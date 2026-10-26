@@ -86,6 +86,16 @@ afterAll(() => {
   jest.restoreAllMocks();
 });
 
+// The "no matching size" development warning is silenced (and asserted on
+// where relevant) so that it doesn't clutter the test output.
+let warnSpy;
+beforeEach(() => {
+  warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
+});
+afterEach(() => {
+  warnSpy.mockRestore();
+});
+
 beforeEach(() => {
   // Reset mock function counts between tests
   mockLoadFn.mockClear();
@@ -356,6 +366,37 @@ describe('Component on the browser', () => {
     expect(track?.getAttribute('src')).toBe(
       'https://www.example.com/captions.vtt',
     );
+  });
+
+  test('warns once in development when no size matches', () => {
+    mockWindowWidth = 1300;
+    render(<ResponsiveVideo sizes={invalidSizes} />);
+
+    act(() => {
+      window.dispatchEvent(new Event('resize'));
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain('(min-width: 9999999px)');
+  });
+
+  test('does not warn when a size matches', () => {
+    mockWindowWidth = 1300;
+    render(<ResponsiveVideo sizes={sizes} />);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  test('does not warn about unmatched sizes in production', () => {
+    const nodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+    try {
+      mockWindowWidth = 1300;
+      render(<ResponsiveVideo sizes={invalidSizes} />);
+      expect(warnSpy).not.toHaveBeenCalled();
+    } finally {
+      process.env.NODE_ENV = nodeEnv;
+    }
   });
 
   test('does not reload when re-rendered with an equal but new sizes array', () => {

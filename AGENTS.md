@@ -78,6 +78,7 @@ src/
     createPosterImage.ts       Detached <picture> with one size's posterSources; returns its <img> (the browser
                                picks the format and starts loading).
   types/
+    env.d.ts                   Ambient type for `process.env.NODE_ENV` only (dev-only checks). Not emitted.
     size.ts                    Size = { height?, width?, mediaQuery?, videoSources: Source[], posterSources: Source[] }
     source.ts                  Source = { url, format? (MIME type) }
 __tests__/
@@ -106,7 +107,10 @@ matchMedia(s.mediaQuery).matches)`. **Order matters**: first match wins, so
   `undefined` on the server and first client render (set in an effect,
   batched with `useIsClient`, so `<Video>` mounts with it already set).
   Re-evaluated on `sizes` change and `window` `resize`. React bails out when
-  the same `Size` object is returned, so most resize ticks are no-ops.
+  the same `Size` object is returned, so most resize ticks are no-ops. If
+  **no size matches**, the video has no sources and stays empty. In
+  development it then logs a `console.warn` (once per `sizes` value, listing
+  the media queries).
 - `poster = useLoadedUrl(posterImgRef, selectedSize)` → `{ isSettled, url? }`,
   re-run whenever `selectedSize` changes. While `<Poster>` is mounted it
   awaits `img.decode()` on the **real** poster `<img>` (ref passed to
@@ -157,6 +161,13 @@ that match no `<source>`).
 - Components are default-exported function components; hooks are anonymous
   default exports. Files are camelCase.
 - `'use client'` sits at the top of any module using hooks (for Next.js App Router).
+- Development-only code (warnings) is gated by
+  `process.env.NODE_ENV !== 'production'`, like React itself, so consumer
+  bundlers strip it. Its type comes from
+  [src/types/env.d.ts](src/types/env.d.ts): TypeScript 6 no longer loads
+  `@types/*` automatically, and Node types are kept out of `src/` on
+  purpose. Don't add `"types": ["node"]` (it would also clash with that
+  declaration).
 - New public types must be re-exported from [src/index.ts](src/index.ts).
 - `peerDependencies.react` is `>=16.14.0` because `"jsx": "react-jsx"` makes
   every compiled component `require("react/jsx-runtime")`, which first shipped
@@ -222,6 +233,9 @@ that match no `<source>`).
   **latest** `decode()` call;
   `mockDecodeFn.mock.contexts.at(-1)` is the `<img>` it was called on (the
   page one or a detached one).
+- `console.warn` is mocked in every client test (`warnSpy`) to keep the
+  "no matching size" warning out of the output. Assert on `warnSpy` to test
+  warnings. Warnings you don't expect are silenced too.
 
 ## Possible improvements & known issues
 
@@ -234,56 +248,53 @@ version requirement), so update it whenever that behaviour changes.
 
 ### Bugs / behavioural issues
 
-1. **No matching `Size`** (no fallback without `mediaQuery`): the video
-   renders with no sources and no dimensions; nothing warns the user. Add
-   a dev-mode `console.warn`, or document the requirement more prominently.
-2. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
+1. **Unhandled promise from `video.play()`** in `video.tsx` (autoplay
    policies reject it). Add `.catch(() => {})` or surface it.
-3. **`video.load()` is called on mount** even though the browser already
+2. **`video.load()` is called on mount** even though the browser already
    loads the initial sources, which may cause a duplicate request. Skip the
    first run of that effect.
-4. **Real `sizes` changes reload even when the chosen sources don't.**
+3. **Real `sizes` changes reload even when the chosen sources don't.**
    `useStableSizes` compares the whole array, so e.g. adding a size for
    another breakpoint still reloads the playing video. Keying the reload
    effect on the selected size's `videoSources` would avoid that.
 
 ### API / DX improvements
 
-5. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
-6. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
+4. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
+5. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
    global `resize` listener in `useSelectedSize`: it fires only when a breakpoint is crossed,
    and it also covers zoom and orientation changes without polling.
-7. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+6. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
    works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-8. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+7. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
    `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
-9. Accessibility: the `<img alt>` disappears when the video replaces it.
+8. Accessibility: the `<img alt>` disappears when the video replaces it.
    The README tells users to pass `aria-label` via `videoProps`; the
    component could derive one from `imgProps.alt` instead.
-10. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
-    poster) for robustness when no `<source>` matches.
+9. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+   poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-11. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
+10. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
     shaking; `target: es2016` could be raised.
-12. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+11. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
-13. Add tests for the issues above (e.g. `play()` rejection). Real browser
+12. Add tests for the issues above (e.g. `play()` rejection). Real browser
     behaviour (`decode()` before/after hydration, `loadeddata` vs poster
     race) is not covered by jsdom. A small Playwright suite would catch it.
-14. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
+13. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
     pin React 19, so older versions are untested); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-15. `.npmignore` is redundant with `"files": ["dist"]` and lists
+14. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-16. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+15. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-17. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+16. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").
