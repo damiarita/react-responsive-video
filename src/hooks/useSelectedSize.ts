@@ -15,18 +15,17 @@ function getSelectedSize(sizes: Size[]): Size | undefined {
 export default function (sizes: Size[]) {
   const [selectedSize, setSelectedSize] = useState<Size | undefined>();
 
-  // Re-evaluate whenever `sizes` changes and on viewport resize too, so the
-  // video and its poster keep up with the native <picture> behaviour. This is
-  // a cheap no-op on most resize ticks: `sizes.find` returns the same object
-  // reference until the viewport actually crosses a breakpoint, and React
-  // bails out of re-rendering when the new state is reference-equal to the
-  // old one.
+  // Re-evaluate whenever `sizes` changes and whenever one of its media queries
+  // starts or stops matching, so the video and its poster keep up with the
+  // native <picture> behaviour. Unlike `resize`, media query `change` events
+  // only fire when a breakpoint is crossed, and they also cover zoom, screen
+  // rotation and non-width queries (e.g. orientation, resolution).
   useEffect(() => {
     let warned = false;
     const updateSelectedSize = () => {
       const size = getSelectedSize(sizes);
       // Without a match the video has no sources and silently stays empty.
-      // Warn once per `sizes` (not on every resize tick), in development only.
+      // Warn once per `sizes` (not on every change), in development only.
       if (process.env.NODE_ENV !== 'production' && !size && !warned) {
         warned = true;
         console.warn(
@@ -39,9 +38,18 @@ export default function (sizes: Size[]) {
       setSelectedSize(size);
     };
     updateSelectedSize();
-    window.addEventListener('resize', updateSelectedSize);
+    const mediaQueryLists = Array.from(
+      new Set(sizes.map(({ mediaQuery }) => mediaQuery)),
+    )
+      .filter((mediaQuery): mediaQuery is string => mediaQuery !== undefined)
+      .map((mediaQuery) => window.matchMedia(mediaQuery));
+    mediaQueryLists.forEach((mediaQueryList) =>
+      mediaQueryList.addEventListener('change', updateSelectedSize),
+    );
     return () => {
-      window.removeEventListener('resize', updateSelectedSize);
+      mediaQueryLists.forEach((mediaQueryList) =>
+        mediaQueryList.removeEventListener('change', updateSelectedSize),
+      );
     };
   }, [sizes]);
 

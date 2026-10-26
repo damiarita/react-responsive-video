@@ -74,7 +74,7 @@ src/
     useLoadedUrl.ts            Poster URL for the selected size + whether it settled. decode() on Poster's real
                                <img> while it exists, a detached <picture> after the swap. Cancels stale results.
     useSelectedSize.ts         The first Size whose mediaQuery matches (undefined until mounted). Re-evaluates on
-                               `sizes` change and `window` resize.
+                               `sizes` change and on `change` of each query's MediaQueryList.
     useStableSizes.ts          Returns the previous `sizes` reference while its JSON content is unchanged
                                (so inline array literals don't re-trigger effects).
   utils/
@@ -116,8 +116,10 @@ matchMedia(s.mediaQuery).matches)`. **Order matters**: first match wins, so
   put the most specific queries first and a query-less fallback last. It is
   `undefined` on the server and first client render (set in an effect,
   batched with `useIsClient`, so `<Video>` mounts with it already set).
-  Re-evaluated on `sizes` change and `window` `resize`. React bails out when
-  the same `Size` object is returned, so most resize ticks are no-ops. If
+  Re-evaluated on `sizes` change and on the `change` event of a
+  `matchMedia(query)` list per distinct `mediaQuery` (not `resize`): it fires
+  only when a query flips, and also covers zoom, rotation and non-width
+  queries. Listeners are removed on unmount and when `sizes` changes. If
   **no size matches**, the video has no sources and stays empty. In
   development it then logs a `console.warn` (once per `sizes` value, listing
   the media queries).
@@ -195,7 +197,9 @@ that match no `<source>`).
   Raise the range if you use a newer React API.
 - Tests: behaviour on the client goes in `client_tests.tsx` (drive the
   poster via the `decode()` mock's `mockOnLoad`/`mockOnError`, the video
-  via `fireEvent(video, new Event('loadeddata'))`, breakpoints via `mockWindowWidth` + a `resize` event); server output
+  via `fireEvent(video, new Event('loadeddata'))`, breakpoints via `setWindowWidth(n)` inside `act`, which fires `change`
+  only on the media query lists that flip, like a browser; set
+  `mockWindowWidth` directly only before `render`); server output
   goes in `ssr_tests.tsx`. The `matchMedia` mock only understands
   `(min-width: Npx)`.
 
@@ -240,6 +244,9 @@ that match no `<source>`).
   `docs/update-typedocs` PR. To fix something in `docs/`, fix the JSDoc or
   `readme.md`. `docs/README.md` lags behind `readme.md` until that PR is
   merged, which is expected.
+- `MediaQueryList.addEventListener` needs Safari/iOS 14+ (older Safari only
+  has the deprecated `addListener`). There is no fallback on purpose: those
+  versions are long unsupported. Add one if a user reports it.
 - `imgProps.ref` is ignored: `<Poster>` sets its own `ref` on the `<img>`.
 - `npm run build` (`tsc`) does not clean `dist/`, so files deleted from `src/`
   stay in a local `dist/` until you remove them (CI builds from scratch).
@@ -283,45 +290,42 @@ version requirement), so update it whenever that behaviour changes.
 
 ### API / DX improvements
 
-4. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
-   global `resize` listener in `useSelectedSize`: it fires only when a breakpoint is crossed,
-   and it also covers zoom and orientation changes without polling.
-5. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+4. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
    works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-6. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+5. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
    `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
-7. Accessibility: the `<img alt>` disappears when the video replaces it.
+6. Accessibility: the `<img alt>` disappears when the video replaces it.
    The README tells users to pass `aria-label` via `videoProps`; the
    component could derive one from `imgProps.alt` instead.
-8. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+7. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
    poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-9. Ship an ESM build next to CJS (`"sideEffects": false` is already set).
+8. Ship an ESM build next to CJS (`"sideEffects": false` is already set).
    **Low priority**: the package is one component that uses every internal
    file (~16 KB unminified), so tree shaking gains little. If done, note
    that `tsc` emits extensionless imports, which plain Node ESM can't
    resolve. Expose the ESM build to bundlers only, through the `"module"`
    export condition (not `"import"`), and keep Node on CJS. `target: es2016`
    could be raised too.
-10. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
-    `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
-11. Add tests for the issues above (e.g. `play()` rejection). Real browser
+9. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+   `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
+10. Add tests for the issues above (e.g. `play()` rejection). Real browser
     behaviour (`decode()` before/after hydration, `loadeddata` vs poster
     race) is not covered by jsdom. A small Playwright suite would catch it.
-12. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
+11. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
     pin React 19, so older versions are untested); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-13. `.npmignore` is redundant with `"files": ["dist"]` and lists
+12. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-14. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+13. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-15. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+14. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").

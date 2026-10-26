@@ -66,7 +66,7 @@ The easy solution is to add one `<video>` element for each device size and hide 
 
 This component provides a better solution: it downloads only one poster image and one video. It does this by being opinionated:
 
-- It assumes that if the user changes the window size, it is OK to change the video sources and the poster image accordingly (the playback position is kept and, if the video was playing, it keeps playing; the previous poster is shown until the new one has loaded).
+- It assumes that if the window size changes enough to match a different media query (also by zooming or rotating the device), it is OK to change the video sources and the poster image accordingly (the playback position is kept and, if the video was playing, it keeps playing; the previous poster is shown until the new one has loaded).
 - It assumes that the poster images of each size have the same resolution as the videos of that size.
 - It assumes that the `<picture>` and the `<video>` tags that the component renders during the page load have similar styles (i.e: `width:100%;height:auto;`).
 
@@ -206,7 +206,6 @@ There are three different moments during the load of a page that contains the Re
 These are the planned improvements, roughly in order of priority. Suggestions and PRs are welcome!
 
 - **Better error handling**: handle autoplay rejections from `video.play()`.
-- **Media query listeners**: react to breakpoint changes with `matchMedia` listeners instead of `resize` events (also covers zoom and orientation changes).
 - **Packaging**: ship an ES modules build for tree shaking and test against every supported React version (16.14 to 19).
 
 ## Contributing

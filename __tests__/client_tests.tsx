@@ -37,24 +37,54 @@ Object.defineProperty(HTMLImageElement.prototype, 'decode', {
   value: mockDecodeFn,
 });
 
+function mockMatches(query) {
+  const regex = /\(min-width: (\d*)px\)/;
+  const match = regex.exec(query);
+  if (match && match?.length >= 2) {
+    const minWidth = parseInt(match[1]);
+    return minWidth <= mockWindowWidth;
+  }
+  throw Error(
+    'Mocked browser only accepts media queries like /(min-width: (d*)px)/. ' +
+      query +
+      ' was passed. Either upgrade the mock or change the media query',
+  );
+}
+
+// Every MediaQueryList handed out, so that setWindowWidth can notify them
+let mockMediaQueryLists = [];
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: jest.fn().mockImplementation(function (query) {
-    const regex = /\(min-width: (\d*)px\)/;
-    const match = regex.exec(query);
-    if (match && match?.length >= 2) {
-      const minWidth = parseInt(match[1]);
-      return {
-        matches: minWidth <= mockWindowWidth,
-      };
-    }
-    throw Error(
-      'Mocked browser only accepts media queries like /(min-width: (d*)px)/. ' +
-        query +
-        ' was passed. Either upgrade the mock or change the media query',
-    );
+    mockMatches(query); // Throws early for unsupported queries
+    const listeners = new Set();
+    const mediaQueryList = {
+      media: query,
+      get matches() {
+        return mockMatches(query);
+      },
+      addEventListener: (type, listener) => listeners.add(listener),
+      removeEventListener: (type, listener) => listeners.delete(listener),
+      listeners,
+    };
+    mockMediaQueryLists.push(mediaQueryList);
+    return mediaQueryList;
   }),
 });
+
+// Like a browser: changing the viewport width fires `change` only on the
+// media query lists whose result flips (no event if no breakpoint is crossed)
+function setWindowWidth(width) {
+  const matchedBefore = mockMediaQueryLists.map(({ matches }) => matches);
+  mockWindowWidth = width;
+  mockMediaQueryLists.forEach((mediaQueryList, i) => {
+    if (mediaQueryList.matches !== matchedBefore[i]) {
+      mediaQueryList.listeners.forEach((listener) =>
+        listener(new Event('change')),
+      );
+    }
+  });
+}
 
 // Setup a proper mock for HTMLVideoElement
 const mockLoadFn = jest.fn();
@@ -97,6 +127,7 @@ afterEach(() => {
 });
 
 beforeEach(() => {
+  mockMediaQueryLists = [];
   // Reset mock function counts between tests
   mockLoadFn.mockClear();
   mockPlayFn.mockClear();
@@ -164,8 +195,7 @@ describe('Component on the browser', () => {
 
     // Simulate a window resize event
     act(() => {
-      mockWindowWidth = 768;
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(768);
     });
     rerender(
       <ResponsiveVideo
@@ -256,8 +286,7 @@ describe('Component on the browser', () => {
     );
 
     act(() => {
-      mockWindowWidth = 768;
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(768);
     });
 
     // The tablet poster is loaded in a detached <picture> holding only the
@@ -295,8 +324,7 @@ describe('Component on the browser', () => {
     });
 
     act(() => {
-      mockWindowWidth = 768;
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(768);
     });
     await act(async () => {
       mockOnError();
@@ -316,8 +344,7 @@ describe('Component on the browser', () => {
     });
 
     act(() => {
-      mockWindowWidth = 500;
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(500);
     });
 
     expect(container.querySelector('video')?.hasAttribute('poster')).toBe(
@@ -380,8 +407,7 @@ describe('Component on the browser', () => {
     // The component still controls the element too: it reloads on resize
     mockLoadFn.mockClear();
     act(() => {
-      mockWindowWidth = 768;
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(768);
     });
     expect(mockLoadFn).toHaveBeenCalledTimes(1);
   });
@@ -401,16 +427,58 @@ describe('Component on the browser', () => {
   });
 
   test('warns once in development when no size matches', () => {
-    mockWindowWidth = 1300;
-    render(<ResponsiveVideo sizes={invalidSizes} />);
+    mockWindowWidth = 500;
+    // Desktop and tablet only: no fallback size without a media query
+    render(<ResponsiveVideo sizes={sizes.slice(0, 2)} />);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy.mock.calls[0][0]).toContain(
+      '(min-width: 1200px), (min-width: 768px)',
+    );
 
+    // Matching again and then not matching does not warn a second time
     act(() => {
-      window.dispatchEvent(new Event('resize'));
+      setWindowWidth(1300);
+    });
+    act(() => {
+      setWindowWidth(500);
+    });
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  test('re-selects only when a media query changes, not on every resize', () => {
+    mockWindowWidth = 1300;
+    const { container } = render(<ResponsiveVideo sizes={sizes} />);
+    const video = container.querySelector('video');
+    mockLoadFn.mockClear();
+
+    // A resize that crosses no breakpoint: no change event, nothing to do
+    act(() => {
+      setWindowWidth(1250);
       window.dispatchEvent(new Event('resize'));
     });
+    expect(mockLoadFn).not.toHaveBeenCalled();
+    expect(video?.getAttribute('width')).toBe('2000');
 
-    expect(warnSpy).toHaveBeenCalledTimes(1);
-    expect(warnSpy.mock.calls[0][0]).toContain('(min-width: 9999999px)');
+    // Crossing (min-width: 1200px) switches to the tablet size
+    act(() => {
+      setWindowWidth(1000);
+    });
+    expect(mockLoadFn).toHaveBeenCalledTimes(1);
+    expect(video?.getAttribute('width')).toBe('1024');
+  });
+
+  test('stops listening to media queries on unmount', () => {
+    mockWindowWidth = 1300;
+    const { unmount } = render(<ResponsiveVideo sizes={sizes} />);
+    expect(
+      mockMediaQueryLists.some(({ listeners }) => listeners.size > 0),
+    ).toBe(true);
+
+    unmount();
+
+    expect(
+      mockMediaQueryLists.every(({ listeners }) => listeners.size === 0),
+    ).toBe(true);
   });
 
   test('does not warn when a size matches', () => {
