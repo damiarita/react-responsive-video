@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "^7.29.7",
     "@babel/preset-env": "^7.28.6",
-    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-react": "^8.0.1",
     "@babel/preset-typescript": "^7.28.5",
     "@eslint/compat": "^2.1.1",
     "@eslint/eslintrc": "^3.3.7",
