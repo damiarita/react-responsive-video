@@ -183,6 +183,11 @@ that match no `<source>`).
   purpose. Don't add `"types": ["node"]` (it would also clash with that
   declaration).
 - New public types must be re-exported from [src/index.ts](src/index.ts).
+- `package.json` declares `"sideEffects": false`, a promise to bundlers that
+  importing any file of the package does nothing by itself. Modules in `src/`
+  must not run code on import: no top-level DOM or global changes, polyfills
+  or CSS imports. If one ever has to, list it in a `"sideEffects": [...]`
+  array instead of breaking the promise.
 - `peerDependencies.react` is `>=16.14.0` because `"jsx": "react-jsx"` makes
   every compiled component `require("react/jsx-runtime")`, which first shipped
   in React 16.14. Don't switch to the classic runtime (`"jsx": "react"`) to
@@ -293,8 +298,13 @@ version requirement), so update it whenever that behaviour changes.
 
 ### Packaging / tooling
 
-9. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
-   shaking; `target: es2016` could be raised.
+9. Ship an ESM build next to CJS (`"sideEffects": false` is already set).
+   **Low priority**: the package is one component that uses every internal
+   file (~16 KB unminified), so tree shaking gains little. If done, note
+   that `tsc` emits extensionless imports, which plain Node ESM can't
+   resolve. Expose the ESM build to bundlers only, through the `"module"`
+   export condition (not `"import"`), and keep Node on CJS. `target: es2016`
+   could be raised too.
 10. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
 11. Add tests for the issues above (e.g. `play()` rejection). Real browser
