@@ -1,7 +1,6 @@
 import {
   useRef,
   useEffect,
-  useState,
   DetailedHTMLProps,
   VideoHTMLAttributes,
 } from 'react';
@@ -18,45 +17,12 @@ export type VideoProps = Omit<
 
 type Props = {
   videoProps?: VideoProps;
-  sizes: Size[];
+  size: Size | undefined;
   show: boolean;
   poster?: string;
 };
 
-function getSelectedSize(sizes: Size[]): Size | undefined {
-  return sizes.find(
-    ({ mediaQuery }) =>
-      mediaQuery === undefined || window.matchMedia(mediaQuery).matches,
-  );
-}
-
-export default function Video({ videoProps, sizes, show, poster }: Props) {
-  const [selectedSize, setSelectedSize] = useState<Size | undefined>(() =>
-    getSelectedSize(sizes),
-  );
-
-  // Re-evaluate which size applies whenever the `sizes` prop itself changes.
-  useEffect(() => {
-    setSelectedSize(getSelectedSize(sizes));
-  }, [sizes]);
-
-  // Re-evaluate on viewport resize too, so the video keeps up with the
-  // poster's native <picture> behaviour instead of only updating whenever
-  // something else happens to re-render this component. This is a cheap
-  // no-op on most resize ticks: `sizes.find` returns the same object
-  // reference until the viewport actually crosses a breakpoint, and React
-  // bails out of re-rendering when the new state is reference-equal to the
-  // old one.
-  useEffect(() => {
-    const handleResize = () => {
-      setSelectedSize(getSelectedSize(sizes));
-    };
-    window.addEventListener('resize', handleResize);
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [sizes]);
-
+export default function Video({ videoProps, size, show, poster }: Props) {
   const { children: userChildren, ...restVideoProps } = videoProps ?? {};
 
   const overRidenVideoProps = Object.assign(
@@ -78,22 +44,18 @@ export default function Video({ videoProps, sizes, show, poster }: Props) {
     }
     // If the video was playing, resume playback
     if (wasPlaying) videoRef?.current?.play();
-  }, [selectedSize]);
+  }, [size]);
 
   return (
     <video
       {...overRidenVideoProps}
-      height={selectedSize?.height}
-      width={selectedSize?.width}
+      height={size?.height}
+      width={size?.width}
       poster={poster}
       ref={videoRef}
     >
-      {selectedSize?.videoSources.map(({ url, format }) => (
-        <source
-          key={`${selectedSize.mediaQuery}-${url}`}
-          src={url}
-          type={format}
-        />
+      {size?.videoSources.map(({ url, format }) => (
+        <source key={`${size.mediaQuery}-${url}`} src={url} type={format} />
       ))}
       {userChildren}
     </video>

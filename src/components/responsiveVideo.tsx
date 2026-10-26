@@ -7,6 +7,7 @@ import useLoadedUrl from '../hooks/useLoadedUrl';
 import { useState, useCallback, useRef, SyntheticEvent } from 'react';
 import useIsClient from '../hooks/useIsClient';
 import useStableSizes from '../hooks/useStableSizes';
+import useSelectedSize from '../hooks/useSelectedSize';
 
 /**
  * The prop type to the Responsive Video React Component
@@ -143,8 +144,9 @@ export default function ReactResponsiveVideo({
 }: ReactResponsiveVideoProps) {
   const sizes = useStableSizes(sizesProp);
   const isClient = useIsClient();
+  const selectedSize = useSelectedSize(sizes);
   const posterImgRef = useRef<HTMLImageElement>(null);
-  const poster = useLoadedUrl(posterImgRef, sizes);
+  const poster = useLoadedUrl(posterImgRef, selectedSize);
   const [videoIsLoaded, setVideoIsLoaded] = useState(false);
   const somethingIsLoaded = poster.isSettled || videoIsLoaded;
   const setVideoLoadedToTrue = useCallback(() => setVideoIsLoaded(true), []);
@@ -170,7 +172,7 @@ export default function ReactResponsiveVideo({
         <Video
           show={somethingIsLoaded}
           videoProps={{ ...videoProps, onLoadedData: handleVideoLoadedData }}
-          sizes={sizes}
+          size={selectedSize}
           poster={poster.url}
         />
       )}

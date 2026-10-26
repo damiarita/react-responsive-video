@@ -203,20 +203,101 @@ describe('Component on the browser', () => {
     expect(video?.hasAttribute('poster')).toBe(false);
   });
 
-  test('drops the poster if sizes change after the swap', async () => {
+  test('updates the poster when a breakpoint is crossed after the swap', async () => {
+    mockWindowWidth = 1300;
+    const { container } = render(<ResponsiveVideo sizes={sizes} />);
+    await act(async () => {
+      mockOnLoad('https://www.example.com/desktop.webp');
+    });
+    const video = container.querySelector('video');
+    expect(video?.getAttribute('poster')).toBe(
+      'https://www.example.com/desktop.webp',
+    );
+
+    act(() => {
+      mockWindowWidth = 768;
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    // The tablet poster is loaded in a detached <picture> holding only the
+    // tablet sources, so the browser still picks the format.
+    const posterImg = mockDecodeFn.mock.contexts.at(-1);
+    expect(posterImg.isConnected).toBe(false);
+    expect(
+      [...posterImg.parentElement.querySelectorAll('source')].map((source) => [
+        source.srcset,
+        source.type,
+      ]),
+    ).toEqual([
+      ['https://www.example.com/tablet.avif', 'image/avif'],
+      ['https://www.example.com/tablet.webp', 'image/webp'],
+      ['https://www.example.com/tablet.jpg', 'image/jpeg'],
+    ]);
+    // The previous poster stays until the new one is ready
+    expect(video?.getAttribute('poster')).toBe(
+      'https://www.example.com/desktop.webp',
+    );
+
+    await act(async () => {
+      mockOnLoad('https://www.example.com/tablet.webp');
+    });
+    expect(video?.getAttribute('poster')).toBe(
+      'https://www.example.com/tablet.webp',
+    );
+  });
+
+  test('removes the poster if the new size poster fails after a breakpoint change', async () => {
+    mockWindowWidth = 1300;
+    const { container } = render(<ResponsiveVideo sizes={sizes} />);
+    await act(async () => {
+      mockOnLoad('https://www.example.com/desktop.webp');
+    });
+
+    act(() => {
+      mockWindowWidth = 768;
+      window.dispatchEvent(new Event('resize'));
+    });
+    await act(async () => {
+      mockOnError();
+    });
+
+    expect(container.querySelector('video')?.hasAttribute('poster')).toBe(
+      false,
+    );
+  });
+
+  test('removes the poster if no size matches after a breakpoint change', async () => {
+    mockWindowWidth = 1300;
+    // Desktop and tablet only: no fallback size without a media query
+    const { container } = render(<ResponsiveVideo sizes={sizes.slice(0, 2)} />);
+    await act(async () => {
+      mockOnLoad('https://www.example.com/desktop.webp');
+    });
+
+    act(() => {
+      mockWindowWidth = 500;
+      window.dispatchEvent(new Event('resize'));
+    });
+
+    expect(container.querySelector('video')?.hasAttribute('poster')).toBe(
+      false,
+    );
+  });
+
+  test('updates the poster if sizes change after the swap', async () => {
     mockWindowWidth = 1300;
     const { container, rerender } = render(<ResponsiveVideo sizes={sizes} />);
     await act(async () => {
       mockOnLoad('https://www.example.com/desktop.webp');
     });
-    expect(container.querySelector('video')?.getAttribute('poster')).toBe(
-      'https://www.example.com/desktop.webp',
-    );
 
     rerender(<ResponsiveVideo sizes={minimalSizes} />);
+    await act(async () => {
+      mockOnLoad('https://www.example.com/mobile.jpg');
+    });
 
-    expect(container.querySelector('video')?.hasAttribute('poster')).toBe(
-      false,
+    expect(container.querySelector('video')?.getAttribute('poster')).toBe(
+      'https://www.example.com/mobile.jpg',
     );
   });
 
