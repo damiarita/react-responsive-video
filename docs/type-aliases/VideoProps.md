@@ -8,6 +8,6 @@
 
 > **VideoProps** = `Omit`\<`DetailedHTMLProps`\<`VideoHTMLAttributes`\<`HTMLVideoElement`\>, `HTMLVideoElement`\>, `"poster"` \| `"height"` \| `"width"`\>
 
-Defined in: [components/video.tsx:14](https://github.com/damiarita/react-responsive-video/blob/master/src/components/video.tsx#L14)
+Defined in: [components/video.tsx:13](https://github.com/damiarita/react-responsive-video/blob/master/src/components/video.tsx#L13)
 
 The prop type to the Video element that is created on the client. All the props you could send to a <video> React Component are accepted except for 'poster', 'height' and 'width'. These are calculated from the sizes property. id, className, autoPlay... are examples of valid
