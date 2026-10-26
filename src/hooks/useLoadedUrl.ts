@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, RefObject } from 'react';
+import { useState, useEffect } from 'react';
 import Size from '../types/size';
+import { ImgRef } from '../components/poster';
 import createPosterImage from '../utils/createPosterImage';
 
 type PosterState = {
@@ -18,7 +19,7 @@ type PosterState = {
 // for the video, a breakpoint change loads the new size's poster in a detached
 // <picture>. The previous poster is kept until the new one is ready.
 export default function (
-  imgRef: RefObject<HTMLImageElement | null>,
+  imgRef: ImgRef,
   selectedSize: Size | undefined,
 ): PosterState {
   const [posterState, setPosterState] = useState<PosterState>({

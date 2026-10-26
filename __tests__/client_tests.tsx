@@ -368,6 +368,38 @@ describe('Component on the browser', () => {
     );
   });
 
+  test('gives access to the <video> element through a ref', () => {
+    mockWindowWidth = 1300;
+    const ref = React.createRef<HTMLVideoElement>();
+    const { container } = render(<ResponsiveVideo ref={ref} sizes={sizes} />);
+
+    expect(ref.current).toBe(container.querySelector('video'));
+    ref.current?.play();
+    expect(mockPlayFn).toHaveBeenCalledTimes(1);
+
+    // The component still controls the element too: it reloads on resize
+    mockLoadFn.mockClear();
+    act(() => {
+      mockWindowWidth = 768;
+      window.dispatchEvent(new Event('resize'));
+    });
+    expect(mockLoadFn).toHaveBeenCalledTimes(1);
+  });
+
+  test('supports callback refs', () => {
+    mockWindowWidth = 1300;
+    const callbackRef = jest.fn();
+    const { container, unmount } = render(
+      <ResponsiveVideo ref={callbackRef} sizes={sizes} />,
+    );
+
+    expect(callbackRef).toHaveBeenLastCalledWith(
+      container.querySelector('video'),
+    );
+    unmount();
+    expect(callbackRef).toHaveBeenLastCalledWith(null);
+  });
+
   test('warns once in development when no size matches', () => {
     mockWindowWidth = 1300;
     render(<ResponsiveVideo sizes={invalidSizes} />);

@@ -28,6 +28,12 @@ describe('The behaviour of the component on SSR', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('SSR accepts a ref, which stays null (there is no <video> yet)', () => {
+    const ref = React.createRef<HTMLVideoElement>();
+    renderToStaticMarkup(<ResponsiveVideo ref={ref} sizes={minimalSizes} />);
+    expect(ref.current).toBeNull();
+  });
+
   it('SSR renders correctly when invalid props are sent', () => {
     const component = renderToStaticMarkup(
       <ResponsiveVideo sizes={invalidSizes} />,

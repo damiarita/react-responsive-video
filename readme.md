@@ -98,7 +98,7 @@ The most important prop of the component is `sizes`. It is an array. Each item o
 
 **The order of `sizes` matters.** On the client, the first item whose `mediaQuery` matches (or that has no `mediaQuery`) is used. Put the most specific media queries first and make the last item a fallback **without** a `mediaQuery`. Otherwise, some devices may match no item and get no video at all (in development, the component logs a warning when that happens).
 
-The component will create a `<video>` tag and some temporary `<picture>` and `<img>` tags. You can pass any props (`id`, `className`, `alt`, `autoPlay`...) to them via `videoProps`, `pictureProps` and `imgProps`. `poster`, `width` and `height` cannot be passed via `videoProps` because they are derived from `sizes`. Any `children` passed via `videoProps` (for example a `<track>` element for captions/subtitles) are rendered inside the `<video>` alongside its sources. Your own event handlers (e.g. `onLoadedData`) are still called. A `ref` passed via `imgProps` is not supported, because the component uses the `<img>` ref itself.
+The component will create a `<video>` tag and some temporary `<picture>` and `<img>` tags. You can pass any props (`id`, `className`, `alt`, `autoPlay`...) to them via `videoProps`, `pictureProps` and `imgProps`. `poster`, `width` and `height` cannot be passed via `videoProps` because they are derived from `sizes`. To get the `<video>` element, pass a `ref` to the component itself (see [Controlling the video](#controlling-the-video)). Any `children` passed via `videoProps` (for example a `<track>` element for captions/subtitles) are rendered inside the `<video>` alongside its sources. Your own event handlers (e.g. `onLoadedData`) are still called. A `ref` passed via `imgProps` is not supported, because the component uses the `<img>` ref itself.
 
 Keep in mind that the `<img>` (and its `alt`) is removed once the `<video>` is shown. If the video needs an accessible name, pass it to the video too (e.g. `aria-label` in `videoProps`).
 
@@ -168,7 +168,30 @@ Make sure that your `pictureProps` and your `videoProps` give similar styles via
 
 > **Writing `sizes` inline is fine.** The component compares the _content_ of `sizes`, not the array reference. Re-rendering the parent with an equal (even if newly created) array does not reload the video. The video is only reloaded when the content of `sizes` actually changes.
 
-All the props and types are documented in the [API docs](https://github.com/damiarita/react-responsive-video/blob/master/docs/functions/default.md). The types (`ReactResponsiveVideoProps`, `Size`, `Source`, `VideoProps`, `PictureProps` and `ImageProps`) are exported from the package.
+All the props and types are documented in the [API docs](https://github.com/damiarita/react-responsive-video/blob/master/docs/globals.md). The types (`ReactResponsiveVideoProps`, `Size`, `Source`, `VideoProps`, `PictureProps` and `ImageProps`) are exported from the package.
+
+### Controlling the video
+
+Pass a `ref` to the component to get the underlying `<video>` element, for example to build your own play/pause button:
+
+```tsx
+import { useRef } from 'react';
+import ReactResponsiveVideo from '@damiarita/react-responsive-video';
+
+export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  return (
+    <>
+      <ReactResponsiveVideo ref={videoRef} sizes={sizes} />
+      <button onClick={() => videoRef.current?.play()}>Play</button>
+      <button onClick={() => videoRef.current?.pause()}>Pause</button>
+    </>
+  );
+}
+```
+
+The `<video>` only exists in the browser, so `ref.current` is `null` during SSR and until the component has mounted. After that, it is always set, even while the poster is still shown (the video is then hidden with `display:none`). Callback refs are supported too.
 
 ## More details of what happens in the browser
 
@@ -183,7 +206,6 @@ There are three different moments during the load of a page that contains the Re
 These are the planned improvements, roughly in order of priority. Suggestions and PRs are welcome!
 
 - **Better error handling**: handle autoplay rejections from `video.play()`.
-- **Ref forwarding**: access the underlying `<video>` element to control playback (`play()`, `pause()`...).
 - **Media query listeners**: react to breakpoint changes with `matchMedia` listeners instead of `resize` events (also covers zoom and orientation changes).
 - **Packaging**: ship an ES modules build for tree shaking and test against every supported React version (16.14 to 19).
 

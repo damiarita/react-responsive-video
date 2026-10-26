@@ -37,15 +37,16 @@ The user is expected to style `<picture>` and `<video>` similarly (e.g.
 
 ## Commands
 
-| Task                        | Command                                                                    |
-| --------------------------- | -------------------------------------------------------------------------- |
-| Install                     | `npm ci`                                                                   |
-| Build (also the type check) | `npm run build` (`tsc` → `dist/`, CJS + `.d.ts` + maps)                    |
-| Full test (what CI runs)    | `npm test` = `eslint .` → `prettier --check .` → `jest` (coverage)         |
-| Run one test file           | `npx jest __tests__/client_tests.tsx --coverage=false`                     |
-| Update snapshots            | `npx jest -u` (review the diff in `__tests__/__snapshots__/`)              |
-| Format                      | `npm run format`                                                           |
-| Preview API docs (TypeDoc)  | `npm run docs` → `docs/` (local preview only, then `git checkout -- docs`) |
+| Task                        | Command                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Install                     | `npm ci`                                                                                                    |
+| Build (also the type check) | `npm run build` (`tsc` → `dist/`, CJS + `.d.ts` + maps)                                                     |
+| Full test (what CI runs)    | `npm test` = `eslint .` → `prettier --check .` → `jest` (coverage)                                          |
+| Run one test file           | `npx jest __tests__/client_tests.tsx --coverage=false`                                                      |
+| Update snapshots            | `npx jest -u` (review the diff in `__tests__/__snapshots__/`)                                               |
+| Format                      | `npm run format`                                                                                            |
+| Preview API docs (TypeDoc)  | `npm run docs` → `docs/` (local preview only, then `git checkout -- docs`)                                  |
+| Check with React 18         | `npm i --no-save react@18 react-dom@18 @types/react@18 && npx tsc --noEmit -p . && npx jest`, then `npm ci` |
 
 Notes:
 
@@ -61,11 +62,13 @@ Notes:
 src/
   index.ts                     Public entry. Default export = component; re-exports prop/data types.
   components/
-    responsiveVideo.tsx        'use client'. Orchestrates Poster ↔ Video swap. Public props type + big JSDoc.
+    responsiveVideo.tsx        'use client'. Orchestrates Poster ↔ Video swap. forwardRef (ref → the <video>).
+                               Public props type + big JSDoc.
     poster.tsx                 <picture> with all poster <source>s (SSR-safe, no hooks). Attaches the `imgRef` it
-                               receives to its <img>. Exports PictureProps, ImageProps.
-    video.tsx                  Client-only <video> for the `size` it receives; reloads when it changes.
-                               Exports VideoProps (video attrs minus poster/height/width).
+                               receives to its <img>. Exports PictureProps, ImageProps, ImgRef.
+    video.tsx                  Client-only <video> for the `size` it receives; reloads when it changes. Merges
+                               its own ref with the user's. Exports VideoProps (video attrs minus
+                               poster/height/width/ref).
   hooks/
     useIsClient.ts             false on server and first client render, true after mount (hydration-safe).
     useLoadedUrl.ts            Poster URL for the selected size + whether it settled. decode() on Poster's real
@@ -93,6 +96,13 @@ dist/                          Build output (git-ignored, the only thing publish
 ## Runtime behaviour in detail
 
 `ReactResponsiveVideo` ([src/components/responsiveVideo.tsx](src/components/responsiveVideo.tsx)):
+
+- It is a `forwardRef` component (needed for React < 19). The user's `ref`
+  is passed to `<Video>` as `forwardedRef` and points to the `<video>`
+  element: `null` on the server and until mount, then set even while the
+  video is still hidden behind the poster. Because the default export is a
+  variable now, TypeDoc puts it in `docs/variables/default.md`. Link to
+  `docs/globals.md` (stable) from the README, not to that page.
 
 - `sizes = useStableSizes(sizesProp)` runs first, and **everything below
   (Poster, useSelectedSize) receives this stabilised array**. Its
@@ -141,7 +151,11 @@ currentSrc }`; reject → `{ isSettled: true }` (no poster), **unless
   `video.load()`, restores `currentTime` and resumes playback if it was playing.
 - `videoProps.children` (e.g. `<track>`) are rendered after the generated
   `<source>`s. When hidden, `style` is **replaced** by `{display:'none'}`.
-- `poster`, `height` and `width` are computed, which is why `VideoProps` omits them.
+- `poster`, `height` and `width` are computed, which is why `VideoProps` omits
+  them. `ref` is omitted too: the ref goes on `<ReactResponsiveVideo>`.
+- Its `ref` is a callback (`setVideoRef`) that sets both the internal
+  `videoRef` (used to reload on size changes) and the user's
+  `forwardedRef` (object or callback).
 
 `Poster` ([src/components/poster.tsx](src/components/poster.tsx)): pure render;
 `<source>`s get `media`, `srcSet`, `type`, `width`, `height`. The `<img>` only
@@ -204,10 +218,14 @@ that match no `<source>`).
   **different content**, not just a new array (equal content is covered by
   the `does not reload when re-rendered with an equal but new sizes array`
   test).
-- Type refs as `RefObject<T | null>`: with React 19 types (the devDeps),
-  `useRef<T>(null)` returns `RefObject<T | null>`, and `RefObject<T>` fails
-  `tsc` (it also works with React 18 types). Jest won't catch type errors
-  (Babel strips types), only `npm run build` does.
+- Ref types differ between React 18 and 19 typings. With React 19 types (the
+  devDeps), `useRef<T>(null)` returns `RefObject<T | null>`, which React
+  18's DOM `ref` rejects; React 18's `RefObject<T>` fails with React 19. For a
+  ref prop that ends up on a DOM element, use a structural type like
+  `ImgRef = { current: HTMLImageElement | null }` (see `poster.tsx`), and
+  for ones you get from users, `ForwardedRef<T>`. Check both typings with the
+  "Check with React 18" command: Jest won't catch type errors (Babel strips
+  types), only `tsc` does.
 - After Dependabot merges, local `node_modules` can be stale (e.g. still
   React 18 while the lockfile has 19). Run `npm ci` before trusting local
   build/test results.
@@ -260,41 +278,40 @@ version requirement), so update it whenever that behaviour changes.
 
 ### API / DX improvements
 
-4. Forward a `ref` to the `<video>` (`forwardRef`, or a `ref` prop for React 19) so consumers can call `play()`/`pause()` imperatively.
-5. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
+4. Use `matchMedia(q).addEventListener('change', …)` per query instead of the
    global `resize` listener in `useSelectedSize`: it fires only when a breakpoint is crossed,
    and it also covers zoom and orientation changes without polling.
-6. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
+5. Use `export type { … }` in [src/index.ts](src/index.ts) so the package
    works with `isolatedModules`/`verbatimModuleSyntax` toolchains.
-7. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
+6. Give hooks named functions (`useIsClient`, `useLoadedUrl`,
    `useSelectedSize`, `useStableSizes`) for nicer stack traces and DevTools names.
-8. Accessibility: the `<img alt>` disappears when the video replaces it.
+7. Accessibility: the `<img alt>` disappears when the video replaces it.
    The README tells users to pass `aria-label` via `videoProps`; the
    component could derive one from `imgProps.alt` instead.
-9. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
+8. Optional `fallbackSrc` / auto `src` on the SSR `<img>` (e.g. the last
    poster) for robustness when no `<source>` matches.
 
 ### Packaging / tooling
 
-10. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
-    shaking; `target: es2016` could be raised.
-11. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
+9. Ship an ESM build (plus `"sideEffects": false`) next to CJS for tree
+   shaking; `target: es2016` could be raised.
+10. Lint and type-check `__tests__/` (currently ignored by ESLint and outside
     `tsconfig` `include`; e.g. the `decode()` mock's `mockOnLoad`/`mockOnError` are implicit `any`).
-12. Add tests for the issues above (e.g. `play()` rejection). Real browser
+11. Add tests for the issues above (e.g. `play()` rejection). Real browser
     behaviour (`decode()` before/after hydration, `loadeddata` vs poster
     race) is not covered by jsdom. A small Playwright suite would catch it.
-13. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
+12. CI: test against a React version matrix (16.14, 17, 18, 19; devDeps
     pin React 19, so older versions are untested); `publish.yml` should
     run `npm test` before publishing; `test.yml` runs twice for PR branches
     (`push` + `pull_request`); Node versions differ (22 vs 24).
-14. `.npmignore` is redundant with `"files": ["dist"]` and lists
+13. `.npmignore` is redundant with `"files": ["dist"]` and lists
     non-existent files (`.eslintrc.json`, `.eslintignore`). Remove it.
-15. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
+14. Narrow `modulePathIgnorePatterns` to `<rootDir>/__tests__/data/` and
     consider disabling `collectCoverage` by default (opt-in via a
     `test:coverage` script) to speed up local runs.
 
 ### Documentation
 
-16. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
+15. Typos in JSDoc (responsiveVideo.tsx: "pucture", "devide", "sice",
     "give", "the the"); `VideoProps` doc sentence is truncated ("…are
     examples of valid").

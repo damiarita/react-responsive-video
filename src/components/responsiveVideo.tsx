@@ -4,7 +4,13 @@ import Size from '../types/size';
 import Poster, { ImageProps, PictureProps } from './poster';
 import Video, { VideoProps } from './video';
 import useLoadedUrl from '../hooks/useLoadedUrl';
-import { useState, useCallback, useRef, SyntheticEvent } from 'react';
+import {
+  forwardRef,
+  useState,
+  useCallback,
+  useRef,
+  SyntheticEvent,
+} from 'react';
 import useIsClient from '../hooks/useIsClient';
 import useStableSizes from '../hooks/useStableSizes';
 import useSelectedSize from '../hooks/useSelectedSize';
@@ -12,7 +18,7 @@ import useSelectedSize from '../hooks/useSelectedSize';
 /**
  * The prop type to the Responsive Video React Component
  * @typedef {Object} ReactResponsiveVideoProps
- * @property {VideoProps} [videoProps] - The props that will be passed to the the React <video> component on the client (only 'poster', 'height' and 'width' are not accepted, as that will be derived from the value of 'sizes')
+ * @property {VideoProps} [videoProps] - The props that will be passed to the the React <video> component on the client (only 'poster', 'height' and 'width' are not accepted, as that will be derived from the value of 'sizes', and 'ref', which goes on the component itself)
  * @property {PictureProps} [pictureProps] - The props that will be passed to the the React <picture> component before it becomes a <video>
  * @property {ImageProps} [imgProps] - The props that will be passed to the the React <img> that is inside the <picture> component before it becomes a <video>
  * @property {Size[]} sizes - An array of Size objects that indicate what posters sources and video sources are available for each media query. The first element with a media query that is valid on the devide (or with an undefined media query) is the used one.
@@ -26,6 +32,8 @@ export type ReactResponsiveVideoProps = {
 
 /**
  * React Component that will optimize video load. On SSR, it paints a <pucture> element with all the sources for the browser to choose. Once on CSR, the element becomes a <video>. Only the sources that are valid for the device sice are give to the <video>. This allows the usage of different video sources by device without having to download all of them.
+ *
+ * Pass a `ref` to get the underlying <video> element (e.g. to call play() or pause()). It is null on the server and until the component has mounted on the client.
  * @param {ReactResponsiveVideoProps} props
  * @example
  * ```tsx
@@ -136,12 +144,13 @@ export type ReactResponsiveVideoProps = {
  * ```
  * @returns {React.ReactElement} A React Component that produces: 1-> On SSR, a <picture> element with all the poster sources for the browser to choose; 2->Once on the client, the same <picture> element with an additional <video> element which has the correct video sources for the device, no poster image and has display:none (its job is to tell the browser to start downloading the video) and 3-> when either the poster image is ready (or failed) or the video has data to show its first frame, only the <video> element which has the correct video sources for the device and the loaded poster image
  */
-export default function ReactResponsiveVideo({
-  pictureProps,
-  videoProps,
-  imgProps,
-  sizes: sizesProp,
-}: ReactResponsiveVideoProps) {
+const ReactResponsiveVideo = forwardRef<
+  HTMLVideoElement,
+  ReactResponsiveVideoProps
+>(function ReactResponsiveVideo(
+  { pictureProps, videoProps, imgProps, sizes: sizesProp },
+  ref,
+) {
   const sizes = useStableSizes(sizesProp);
   const isClient = useIsClient();
   const selectedSize = useSelectedSize(sizes);
@@ -174,8 +183,11 @@ export default function ReactResponsiveVideo({
           videoProps={{ ...videoProps, onLoadedData: handleVideoLoadedData }}
           size={selectedSize}
           poster={poster.url}
+          forwardedRef={ref}
         />
       )}
     </>
   );
-}
+});
+
+export default ReactResponsiveVideo;
