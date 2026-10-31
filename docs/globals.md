@@ -13,6 +13,6 @@
 - [Source](type-aliases/Source.md)
 - [VideoProps](type-aliases/VideoProps.md)
 
-## Functions
+## Variables
 
-- [default](functions/default.md)
+- [default](variables/default.md)
