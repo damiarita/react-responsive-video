@@ -7,8 +7,9 @@ updates:
     # Check the npm registry for updates every day (weekdays)
     schedule:
       interval: 'daily'
-    # A dependency joins the FIRST group it matches. Every minor/patch update
-    # lands in `minor-and-patch`, so the groups below only receive majors.
+    # Every group needs `update-types`. Without it, a group using wildcards
+    # (e.g. '@babel/*') loses its packages to the pattern-less `minor-and-patch`
+    # group, which rejects majors, so each major gets its own failing PR.
     # Packages that must move in lockstep (a package and its peers) share a
     # group, and peers are listed as direct devDependencies so they can be bumped.
     groups:
@@ -17,26 +18,36 @@ updates:
           - 'minor'
           - 'patch'
       babel-packages:
+        update-types:
+          - 'major'
         patterns:
           - '@babel/*'
           - 'babel-jest'
       eslint-packages:
+        update-types:
+          - 'major'
         patterns:
           - '@eslint/*'
           - 'eslint'
           - 'eslint-*'
           - 'globals'
       jest-packages:
+        update-types:
+          - 'major'
         patterns:
           - 'jest*'
           - '@types/jest'
       react-packages:
+        update-types:
+          - 'major'
         patterns:
           - 'react'
           - 'react-dom'
           - '@types/react'
           - '@testing-library/react'
       typescript-packages:
+        update-types:
+          - 'major'
         patterns:
           - 'typescript'
           - '@typescript-eslint/*'

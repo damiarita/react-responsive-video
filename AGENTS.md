@@ -216,7 +216,9 @@ that match no `<source>`).
 - Dependabot ([dependabot.yml](.github/dependabot.yml)) groups minor/patch
   updates together and majors by ecosystem (babel, eslint, jest, react,
   typescript). ESLint 10 and TypeScript ≥7 majors are ignored until plugins
-  support them. Keep coupled packages in the same group.
+  support them. Keep coupled packages in the same group. Every group must set
+  `update-types`: a wildcard group without it loses its packages to the
+  pattern-less `minor-and-patch` group, and each major then gets its own PR.
 
 ## Gotchas
 
